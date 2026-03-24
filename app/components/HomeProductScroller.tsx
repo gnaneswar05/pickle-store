@@ -99,7 +99,7 @@ export default function HomeProductScroller({
         {products.map((product, index) => (
           <div
             key={product._id}
-            className={`w-[84%] max-w-[320px] min-w-[280px] snap-start transition duration-300 md:w-[46%] xl:w-[30%] ${
+            className={`shrink-0 w-[84%] max-w-[320px] min-w-[280px] snap-start transition duration-300 md:w-[46%] xl:w-[30%] ${
               index % 2 === 0 ? "md:translate-y-0" : "md:translate-y-4"
             }`}
           >
