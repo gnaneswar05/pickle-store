@@ -181,6 +181,7 @@ export default function CheckoutPage() {
       },
       body: JSON.stringify({
         items,
+        address: formData,
         couponCode: couponCode || undefined,
       }),
     });

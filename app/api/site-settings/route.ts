@@ -2,10 +2,12 @@ import { NextRequest } from "next/server";
 import connectDB from "@/lib/db";
 import { verifyAdminFromRequest } from "@/lib/utils/auth";
 import {
+  APIError,
   errorResponse,
   handleError,
   successResponse,
 } from "@/lib/utils/response";
+import { parseServiceablePincodes } from "@/lib/utils/serviceable-pincodes";
 import { getSiteSettings } from "@/lib/utils/site-settings";
 
 export async function GET(request: NextRequest) {
@@ -27,6 +29,7 @@ export async function GET(request: NextRequest) {
         manufacturerCity: settings.manufacturerCity,
         manufacturerState: settings.manufacturerState,
         manufacturerPincode: settings.manufacturerPincode,
+        serviceablePincodes: settings.serviceablePincodes,
       });
     }
 
@@ -47,6 +50,17 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json();
     const settings = await getSiteSettings();
+    let serviceablePincodes = settings.serviceablePincodes;
+    if (body.serviceablePincodes !== undefined) {
+      try {
+        serviceablePincodes = parseServiceablePincodes(body.serviceablePincodes);
+      } catch (error) {
+        throw new APIError(
+          400,
+          error instanceof Error ? error.message : "Invalid serviceable pincodes",
+        );
+      }
+    }
 
     settings.set({
       brandName: body.brandName ?? settings.brandName,
@@ -63,6 +77,7 @@ export async function PUT(request: NextRequest) {
       manufacturerState: body.manufacturerState ?? settings.manufacturerState,
       manufacturerPincode:
         body.manufacturerPincode ?? settings.manufacturerPincode,
+      serviceablePincodes,
     });
 
     await settings.save();

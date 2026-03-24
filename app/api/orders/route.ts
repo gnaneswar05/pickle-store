@@ -18,6 +18,8 @@ import {
   calculatePricingBreakdown,
   getTaxSettings,
 } from "@/lib/utils/pricing";
+import { isPincodeServiceable } from "@/lib/utils/serviceable-pincodes";
+import { getSiteSettings } from "@/lib/utils/site-settings";
 
 export async function GET(request: NextRequest) {
   try {
@@ -134,6 +136,16 @@ export async function POST(request: NextRequest) {
 
     if (!validatePincode(address.pincode)) {
       return errorResponse("Invalid pincode", 400);
+    }
+
+    const siteSettings = await getSiteSettings();
+    if (
+      !isPincodeServiceable(address.pincode, siteSettings.serviceablePincodes)
+    ) {
+      return errorResponse(
+        "We are not serving your city yet. We will start soon.",
+        400,
+      );
     }
 
     if (!paymentType || !["COD", "ONLINE"].includes(paymentType)) {

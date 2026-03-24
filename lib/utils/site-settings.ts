@@ -8,6 +8,7 @@ export async function getSiteSettings() {
       brandName: "Kanvi",
       logoUrl: "/logo.jpeg",
       manufacturerName: "Kanvi Homemade Pickles",
+      serviceablePincodes: [],
     });
   }
 

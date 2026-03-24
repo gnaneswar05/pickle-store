@@ -8,6 +8,9 @@ import {
   handleError,
 } from "@/lib/utils/response";
 import { calculatePricingBreakdown, getTaxSettings } from "@/lib/utils/pricing";
+import { isPincodeServiceable } from "@/lib/utils/serviceable-pincodes";
+import { getSiteSettings } from "@/lib/utils/site-settings";
+import { validatePincode } from "@/lib/utils/validation";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || "",
@@ -29,10 +32,24 @@ export async function POST(request: NextRequest) {
       return errorResponse("Razorpay public key is missing", 500);
     }
 
-    const { items, couponCode } = await request.json();
+    const { items, couponCode, address } = await request.json();
 
     if (!items || items.length === 0) {
       return errorResponse("No items in order", 400);
+    }
+
+    if (!address?.pincode || !validatePincode(address.pincode)) {
+      return errorResponse("Invalid pincode", 400);
+    }
+
+    const siteSettings = await getSiteSettings();
+    if (
+      !isPincodeServiceable(address.pincode, siteSettings.serviceablePincodes)
+    ) {
+      return errorResponse(
+        "We are not serving your city yet. We will start soon.",
+        400,
+      );
     }
 
     const subtotalAmount = items.reduce(

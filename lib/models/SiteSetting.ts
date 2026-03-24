@@ -12,6 +12,7 @@ export interface ISiteSetting extends Document {
   manufacturerCity: string;
   manufacturerState: string;
   manufacturerPincode: string;
+  serviceablePincodes: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -72,6 +73,10 @@ const SiteSettingSchema = new Schema(
       type: String,
       default: "",
       trim: true,
+    },
+    serviceablePincodes: {
+      type: [String],
+      default: [],
     },
   },
   { timestamps: true },
