@@ -58,18 +58,37 @@ export async function PUT(
     const { id } = await params;
 
     const body = await request.json();
-    const { status } = body;
+    const { status, shipperName } = body;
 
     if (
       !status ||
-      !["PENDING", "CONFIRMED", "PREPARING", "DELIVERED"].includes(status)
+      !["PENDING", "CONFIRMED", "PREPARING", "SHIPPED", "DELIVERED"].includes(
+        status,
+      )
     ) {
       return errorResponse("Invalid status", 400);
     }
 
+    if (status === "SHIPPED" && !shipperName?.trim()) {
+      return errorResponse("Shipper name is required", 400);
+    }
+
+    const updateData: {
+      status: string;
+      shipperName?: string;
+      shippedAt?: Date;
+    } = {
+      status,
+    };
+
+    if (status === "SHIPPED") {
+      updateData.shipperName = shipperName.trim();
+      updateData.shippedAt = new Date();
+    }
+
     const order = await Order.findByIdAndUpdate(
       id,
-      { status },
+      updateData,
       { new: true },
     );
 

@@ -40,6 +40,7 @@ export async function getTaxSettings() {
     settings = await TaxSetting.create({
       taxes: [],
       deliveryCharge: 0,
+      codLimit: 250,
     });
   }
 

@@ -28,7 +28,9 @@ export interface IOrder extends Document {
     pincode: string;
   };
   paymentType: "COD" | "ONLINE";
-  status: "PENDING" | "CONFIRMED" | "PREPARING" | "DELIVERED";
+  status: "PENDING" | "CONFIRMED" | "PREPARING" | "SHIPPED" | "DELIVERED";
+  shipperName?: string;
+  shippedAt?: Date | null;
   couponCode?: string;
   discountAmount: number;
   createdAt: Date;
@@ -98,8 +100,16 @@ const OrderSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["PENDING", "CONFIRMED", "PREPARING", "DELIVERED"],
+      enum: ["PENDING", "CONFIRMED", "PREPARING", "SHIPPED", "DELIVERED"],
       default: "PENDING",
+    },
+    shipperName: {
+      type: String,
+      default: null,
+    },
+    shippedAt: {
+      type: Date,
+      default: null,
     },
     couponCode: String,
     discountAmount: {

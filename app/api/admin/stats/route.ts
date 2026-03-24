@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import connectDB from "@/lib/db";
 import Order from "@/lib/models/Order";
+import User from "@/lib/models/User";
 import { verifyAdminFromRequest } from "@/lib/utils/auth";
 import {
   errorResponse,
@@ -20,9 +21,10 @@ export async function GET(request: NextRequest) {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
-    const [totalOrders, todayOrders, revenueResult] = await Promise.all([
+    const [totalOrders, todayOrders, totalCustomers, revenueResult] = await Promise.all([
       Order.countDocuments(),
       Order.countDocuments({ createdAt: { $gte: todayStart } }),
+      User.countDocuments(),
       Order.aggregate([
         {
           $group: {
@@ -36,6 +38,7 @@ export async function GET(request: NextRequest) {
     return successResponse({
       totalOrders,
       todayOrders,
+      totalCustomers,
       totalRevenue: revenueResult[0]?.totalRevenue || 0,
     });
   } catch (error) {

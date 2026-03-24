@@ -22,16 +22,46 @@ import {
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(Number(searchParams.get("page") || "1"), 1);
+    const limit = Math.max(Number(searchParams.get("limit") || "10"), 1);
+    const status = searchParams.get("status");
+    const search = searchParams.get("search")?.trim();
 
     const admin = await verifyAdminFromRequest(request);
     if (admin) {
-      const orders = await Order.find().sort({
-        createdAt: -1,
-      });
+      const query: {
+        status?: string;
+        $or?: Array<Record<string, { $regex: string; $options: string }>>;
+      } = {};
+
+      if (status && status !== "ALL") {
+        query.status = status;
+      }
+
+      if (search) {
+        query.$or = [
+          { invoiceNumber: { $regex: search, $options: "i" } },
+          { "address.name": { $regex: search, $options: "i" } },
+          { "address.phone": { $regex: search, $options: "i" } },
+          { shipperName: { $regex: search, $options: "i" } },
+        ];
+      }
+
+      const total = await Order.countDocuments(query);
+      const orders = await Order.find(query)
+        .sort({
+          createdAt: -1,
+        })
+        .skip((page - 1) * limit)
+        .limit(limit);
 
       return successResponse({
         orders,
-        total: orders.length,
+        total,
+        page,
+        limit,
+        totalPages: Math.max(Math.ceil(total / limit), 1),
       });
     }
 
@@ -45,13 +75,21 @@ export async function GET(request: NextRequest) {
       return errorResponse("Invalid token", 401);
     }
 
-    const orders = await Order.find({ userId: decoded.userId }).sort({
-      createdAt: -1,
-    });
+    const userQuery = { userId: decoded.userId };
+    const total = await Order.countDocuments(userQuery);
+    const orders = await Order.find(userQuery)
+      .sort({
+        createdAt: -1,
+      })
+      .skip((page - 1) * limit)
+      .limit(limit);
 
     return successResponse({
       orders,
-      total: orders.length,
+      total,
+      page,
+      limit,
+      totalPages: Math.max(Math.ceil(total / limit), 1),
     });
   } catch (error) {
     return handleError(error);
@@ -141,8 +179,11 @@ export async function POST(request: NextRequest) {
     });
 
     // Check COD eligibility
-    if (paymentType === "COD" && pricing.totalAmount >= 250) {
-      return errorResponse("COD not available for orders above 250", 400);
+    if (paymentType === "COD" && pricing.totalAmount >= taxSettings.codLimit) {
+      return errorResponse(
+        `COD not available for orders above ${taxSettings.codLimit}`,
+        400,
+      );
     }
 
     const order = new Order({

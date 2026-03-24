@@ -77,11 +77,28 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-3xl font-bold text-center text-gray-900 mb-6">
+    <div className="mx-auto flex min-h-[70vh] w-full max-w-5xl items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+      <div className="grid w-full overflow-hidden rounded-[32px] border border-[var(--line)] bg-white shadow-[0_24px_64px_rgba(92,60,37,0.12)] lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="hidden bg-[linear-gradient(160deg,rgba(109,36,16,0.96),rgba(159,63,35,0.9),rgba(215,163,71,0.82))] p-8 text-white lg:block">
+          <p className="text-xs font-semibold uppercase tracking-[0.34em] text-amber-100">
+            Welcome Back
+          </p>
+          <h1 className="mt-4 text-4xl font-semibold leading-tight">
+            Sign in to save your cart and track every order.
+          </h1>
+          <p className="mt-4 text-sm leading-7 text-amber-50/90">
+            Use your mobile number to receive a quick OTP and continue shopping
+            without losing your details.
+          </p>
+        </div>
+
+        <div className="w-full p-6 sm:p-8">
+        <h2 className="mb-2 text-center text-3xl font-bold text-gray-900">
          Login
         </h2>
+        <p className="mb-6 text-center text-sm text-gray-600">
+          Enter your mobile number to receive OTP.
+        </p>
 
         {error && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -101,6 +118,7 @@ export default function LoginPage() {
                 onChange={(e) => setPhone(e.target.value.slice(0, 10))}
                 placeholder="10-digit mobile number"
                 maxLength={10}
+                inputMode="numeric"
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500"
               />
@@ -127,6 +145,7 @@ export default function LoginPage() {
                 onChange={(e) => setOtp(e.target.value.slice(0, 6))}
                 placeholder="6-digit OTP"
                 maxLength={6}
+                inputMode="numeric"
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500"
               />
@@ -152,6 +171,7 @@ export default function LoginPage() {
             </button>
           </form>
         )}
+        </div>
       </div>
     </div>
   );

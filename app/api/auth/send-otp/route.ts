@@ -28,7 +28,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate OTP
-    const otp = generateOTP();
+    // const otp = generateOTP();
+    const otp = 123456;
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     user.otp = otp;

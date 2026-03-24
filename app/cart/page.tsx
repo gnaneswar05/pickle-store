@@ -3,11 +3,34 @@
 import FallbackImage from "@/app/components/FallbackImage";
 import { useCart, useToast } from "@/app/store/useStore";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotal, clearCart } = useCart();
   const { pushToast } = useToast();
+  const [deliveryCharge, setDeliveryCharge] = useState(0);
+  const [codLimit, setCodLimit] = useState(250);
   const total = getTotal();
+
+  useEffect(() => {
+    const fetchOrderSettings = async () => {
+      try {
+        const res = await fetch("/api/taxes");
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to load order settings");
+        }
+
+        setDeliveryCharge(data.data.deliveryCharge || 0);
+        setCodLimit(data.data.codLimit || 250);
+      } catch (error) {
+        console.error("Error fetching order settings:", error);
+      }
+    };
+
+    fetchOrderSettings();
+  }, []);
 
   if (items.length === 0) {
     return (
@@ -122,14 +145,17 @@ export default function CartPage() {
             </div>
             <div className="flex justify-between">
               <span>Shipping</span>
-              <span>Free</span>
+              <span>Rs. {deliveryCharge.toFixed(2)}</span>
             </div>
           </div>
 
           <div className="mt-5 border-t border-[var(--line)] pt-5">
+            <p className="mb-3 text-xs text-stone-500">
+              Cash on Delivery available below Rs. {codLimit.toFixed(2)}.
+            </p>
             <div className="flex justify-between text-lg font-semibold text-[var(--brand-deep)]">
               <span>Total</span>
-              <span>Rs. {total}</span>
+              <span>Rs. {(total + deliveryCharge).toFixed(2)}</span>
             </div>
           </div>
 

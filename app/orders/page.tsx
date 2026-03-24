@@ -1,5 +1,6 @@
 "use client";
 
+import PageLoader from "@/app/components/PageLoader";
 import { useAuth } from "@/app/store/useStore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -56,6 +57,8 @@ export default function OrdersPage() {
         return "bg-sky-100 text-sky-900";
       case "PREPARING":
         return "bg-orange-100 text-orange-900";
+      case "SHIPPED":
+        return "bg-violet-100 text-violet-900";
       case "DELIVERED":
         return "bg-emerald-100 text-emerald-900";
       default:
@@ -86,7 +89,11 @@ export default function OrdersPage() {
       </section>
 
       {loading ? (
-        <div className="py-16 text-center text-stone-600">Loading orders...</div>
+        <PageLoader
+          compact
+          label="Loading Orders"
+          detail="We are fetching your latest order updates and statuses."
+        />
       ) : orders.length > 0 ? (
         <div className="space-y-4">
           {orders.map((order) => (

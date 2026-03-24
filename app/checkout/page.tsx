@@ -1,5 +1,6 @@
 "use client";
 
+import PageLoader from "@/app/components/PageLoader";
 import { useAuth, useCart } from "@/app/store/useStore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -22,6 +23,9 @@ type RazorpayOptions = {
   }) => void;
   theme: {
     color: string;
+  };
+  modal?: {
+    ondismiss?: () => void;
   };
 };
 
@@ -51,6 +55,7 @@ export default function CheckoutPage() {
   const [couponError, setCouponError] = useState("");
   const [taxes, setTaxes] = useState<TaxItem[]>([]);
   const [deliveryCharge, setDeliveryCharge] = useState(0);
+  const [codLimit, setCodLimit] = useState(250);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -72,11 +77,10 @@ export default function CheckoutPage() {
   }));
   const finalTotal =
     Math.round(
-      (
-        taxableAmount +
+      (taxableAmount +
         taxBreakdown.reduce((sum, tax) => sum + tax.amount, 0) +
-        deliveryCharge
-      ) * 100,
+        deliveryCharge) *
+        100,
     ) / 100;
 
   useEffect(() => {
@@ -97,6 +101,7 @@ export default function CheckoutPage() {
 
         setTaxes(data.data.taxes || []);
         setDeliveryCharge(data.data.deliveryCharge || 0);
+        setCodLimit(data.data.codLimit || 250);
       } catch (error) {
         console.error("Error fetching tax settings:", error);
       } finally {
@@ -191,6 +196,10 @@ export default function CheckoutPage() {
     const razorpayOrder = createOrderData.data.razorpayOrder;
     const keyId = createOrderData.data.keyId;
 
+    if (!keyId) {
+      throw new Error("Razorpay key is missing. Check server environment.");
+    }
+
     const options: RazorpayOptions = {
       key: keyId,
       amount: razorpayOrder.amount,
@@ -223,6 +232,7 @@ export default function CheckoutPage() {
 
         if (!verifyRes.ok) {
           setFormError(verifyData.error || "Payment verification failed");
+          setLoading(false);
           return;
         }
 
@@ -231,6 +241,12 @@ export default function CheckoutPage() {
       },
       theme: {
         color: "#0f766e",
+      },
+      modal: {
+        ondismiss: () => {
+          setLoading(false);
+          setFormError("Payment window was closed. You can choose another option.");
+        },
       },
     };
 
@@ -265,8 +281,8 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (paymentType === "COD" && finalTotal >= 250) {
-      setFormError("COD not available for orders above Rs. 250");
+    if (paymentType === "COD" && finalTotal >= codLimit) {
+      setFormError(`COD not available for orders above Rs. ${codLimit}`);
       setPaymentType("ONLINE");
       return;
     }
@@ -278,6 +294,7 @@ export default function CheckoutPage() {
       if (paymentType === "ONLINE") {
         await loadRazorpayScript();
         await initiateRazorpayPayment();
+        return;
       } else {
         const res = await fetch("/api/orders", {
           method: "POST",
@@ -319,8 +336,28 @@ export default function CheckoutPage() {
     );
   }
 
+  if (settingsLoading) {
+    return (
+      <PageLoader
+        label="Preparing Checkout"
+        detail="We are loading taxes, delivery charges, and payment settings."
+      />
+    );
+  }
+
   return (
     <div>
+      {loading ? (
+        <div className="fixed inset-0 z-50 bg-[rgba(45,27,18,0.22)] p-5 backdrop-blur-sm">
+          <div className="mx-auto flex h-full max-w-7xl items-center justify-center">
+            <PageLoader
+              compact
+              label="Processing Order"
+              detail="Please wait while we complete your payment or place your order."
+            />
+          </div>
+        </div>
+      ) : null}
       <h1 className="text-4xl font-bold text-gray-900 mb-8">Checkout</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -404,13 +441,13 @@ export default function CheckoutPage() {
                     onChange={(e) =>
                       setPaymentType(e.target.value as "COD" | "ONLINE")
                     }
-                    disabled={finalTotal >= 250}
+                    disabled={finalTotal >= codLimit}
                     className="mr-2"
                   />
-                  <span className={finalTotal >= 250 ? "text-gray-400" : ""}>
+                  <span className={finalTotal >= codLimit ? "text-gray-400" : ""}>
                     Cash on Delivery{" "}
-                    {finalTotal >= 250
-                      ? "(Not available for orders above ₹250)"
+                    {finalTotal >= codLimit
+                      ? `(Not available for orders above Rs. ${codLimit})`
                       : ""}
                   </span>
                 </label>
@@ -501,10 +538,6 @@ export default function CheckoutPage() {
               <span>₹{finalTotal.toFixed(2)}</span>
             </div>
           </div>
-          {settingsLoading ? (
-            <p className="mb-4 text-sm text-gray-500">Loading tax settings...</p>
-          ) : null}
-
           {/* Coupon Input */}
           <div className="space-y-2">
             <input

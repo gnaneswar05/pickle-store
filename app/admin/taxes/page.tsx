@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import AdminShell from "@/app/components/AdminShell";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -16,8 +16,10 @@ export default function AdminTaxesPage() {
   const [taxes, setTaxes] = useState<TaxItem[]>([]);
   const [deliveryCharge, setDeliveryCharge] = useState(0);
   const [deliveryDraft, setDeliveryDraft] = useState("0");
+  const [codLimit, setCodLimit] = useState(250);
+  const [codLimitDraft, setCodLimitDraft] = useState("250");
   const [loading, setLoading] = useState(true);
-  const [savingDelivery, setSavingDelivery] = useState(false);
+  const [savingSettings, setSavingSettings] = useState(false);
   const [form, setForm] = useState({
     id: "",
     name: "",
@@ -48,6 +50,8 @@ export default function AdminTaxesPage() {
         setTaxes(data.data.taxes || []);
         setDeliveryCharge(data.data.deliveryCharge || 0);
         setDeliveryDraft(String(data.data.deliveryCharge || 0));
+        setCodLimit(data.data.codLimit || 250);
+        setCodLimitDraft(String(data.data.codLimit || 250));
       } catch (error) {
         console.error("Error fetching taxes:", error);
       } finally {
@@ -57,11 +61,6 @@ export default function AdminTaxesPage() {
 
     fetchTaxes();
   }, [router]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("admin-token");
-    router.push("/admin/login");
-  };
 
   const resetForm = () => {
     setForm({
@@ -139,8 +138,8 @@ export default function AdminTaxesPage() {
     }
   };
 
-  const handleSaveDelivery = async () => {
-    setSavingDelivery(true);
+  const handleSaveOrderSettings = async () => {
+    setSavingSettings(true);
     try {
       const res = await fetch("/api/taxes", {
         method: "PUT",
@@ -150,6 +149,7 @@ export default function AdminTaxesPage() {
         },
         body: JSON.stringify({
           deliveryCharge: Number(deliveryDraft),
+          codLimit: Number(codLimitDraft),
         }),
       });
       const data = await res.json();
@@ -161,94 +161,79 @@ export default function AdminTaxesPage() {
       setTaxes(data.data.taxes || []);
       setDeliveryCharge(data.data.deliveryCharge || 0);
       setDeliveryDraft(String(data.data.deliveryCharge || 0));
+      setCodLimit(data.data.codLimit || 250);
+      setCodLimitDraft(String(data.data.codLimit || 250));
     } catch (error) {
       console.error("Error updating delivery charge:", error);
     } finally {
-      setSavingDelivery(false);
+      setSavingSettings(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-purple-700 text-white shadow">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <h1 className="text-2xl font-bold">Kanvi Admin</h1>
-          <button
-            onClick={handleLogout}
-            className="rounded bg-red-500 px-4 py-2 hover:bg-red-600"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
-
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <nav className="mb-8 rounded-lg bg-white shadow">
-          <div className="flex gap-4 overflow-x-auto px-6 py-4">
-            <Link href="/admin/dashboard" className="text-gray-600 hover:text-purple-700">
-              Dashboard
-            </Link>
-            <Link href="/admin/products" className="text-gray-600 hover:text-purple-700">
-              Products
-            </Link>
-            <Link href="/admin/banners" className="text-gray-600 hover:text-purple-700">
-              Banners
-            </Link>
-            <Link href="/admin/orders" className="text-gray-600 hover:text-purple-700">
-              Orders
-            </Link>
-            <Link href="/admin/coupons" className="text-gray-600 hover:text-purple-700">
-              Coupons
-            </Link>
-            <Link
-              href="/admin/taxes"
-              className="font-bold text-purple-700 hover:text-purple-900"
-            >
-              Taxes
-            </Link>
-          </div>
-        </nav>
-
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold text-gray-900">Taxes & Delivery</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Manage invoice taxes and the delivery charge applied during checkout.
-          </p>
-        </div>
-
+    <AdminShell
+      activeHref="/admin/taxes"
+      title="Taxes & Delivery"
+      subtitle="Manage invoice taxes, COD limits, and delivery charges."
+    >
         {loading ? (
-          <div className="py-12 text-center text-gray-600">Loading...</div>
+          <div className="rounded-xl border border-gray-200/50 bg-white p-10 text-center text-gray-600 shadow-sm">
+            Loading tax settings...
+          </div>
         ) : (
           <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
             <div className="space-y-6">
-              <div className="rounded-lg bg-white p-6 shadow">
+              <div className="rounded-xl border border-gray-200/50 bg-white p-6 shadow-sm">
                 <h3 className="text-xl font-bold text-gray-900">
-                  Delivery Charge
+                  Order Settings
                 </h3>
-                <p className="mt-2 text-sm text-gray-600">
-                  Current charge: Rs. {deliveryCharge.toFixed(2)}
-                </p>
-                <div className="mt-4 flex gap-3">
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={deliveryDraft}
-                    onChange={(e) => setDeliveryDraft(e.target.value)}
-                    className="w-full rounded border border-gray-300 px-4 py-2"
-                  />
+                <div className="mt-4 space-y-4">
+                  <div>
+                    <label className="mb-2 block font-bold text-gray-700">
+                      Delivery Charge
+                    </label>
+                    <p className="mb-2 text-sm text-gray-600">
+                      Current charge: Rs. {deliveryCharge.toFixed(2)}
+                    </p>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={deliveryDraft}
+                      onChange={(e) => setDeliveryDraft(e.target.value)}
+                      className="w-full rounded border border-gray-300 px-4 py-2"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block font-bold text-gray-700">
+                      COD Limit
+                    </label>
+                    <p className="mb-2 text-sm text-gray-600">
+                      COD allowed only below Rs. {codLimit.toFixed(2)}
+                    </p>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={codLimitDraft}
+                      onChange={(e) => setCodLimitDraft(e.target.value)}
+                      className="w-full rounded border border-gray-300 px-4 py-2"
+                    />
+                  </div>
+
                   <button
                     type="button"
-                    onClick={handleSaveDelivery}
-                    disabled={savingDelivery}
+                    onClick={handleSaveOrderSettings}
+                    disabled={savingSettings}
                     className="rounded bg-purple-700 px-4 py-2 font-semibold text-white hover:bg-purple-800 disabled:bg-gray-400"
                   >
-                    {savingDelivery ? "Saving..." : "Save"}
+                    {savingSettings ? "Saving..." : "Save Settings"}
                   </button>
                 </div>
               </div>
 
-              <div className="rounded-lg bg-white p-6 shadow">
+              <div className="rounded-xl border border-gray-200/50 bg-white p-6 shadow-sm">
                 <h3 className="text-xl font-bold text-gray-900">
                   {form.id ? "Edit Tax" : "Add Tax"}
                 </h3>
@@ -318,7 +303,7 @@ export default function AdminTaxesPage() {
               </div>
             </div>
 
-            <div className="rounded-lg bg-white shadow">
+            <div className="rounded-xl border border-gray-200/50 bg-white shadow-sm">
               <div className="border-b px-6 py-4">
                 <h3 className="text-xl font-bold text-gray-900">Configured Taxes</h3>
               </div>
@@ -378,7 +363,6 @@ export default function AdminTaxesPage() {
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </AdminShell>
   );
 }

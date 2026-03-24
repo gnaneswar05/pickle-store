@@ -47,6 +47,7 @@ export async function PUT(
       message: "Tax updated successfully",
       taxes: settings.taxes,
       deliveryCharge: settings.deliveryCharge,
+      codLimit: settings.codLimit,
     });
   } catch (error) {
     return handleError(error);
@@ -80,6 +81,7 @@ export async function DELETE(
       message: "Tax deleted successfully",
       taxes: settings.taxes,
       deliveryCharge: settings.deliveryCharge,
+      codLimit: settings.codLimit,
     });
   } catch (error) {
     return handleError(error);

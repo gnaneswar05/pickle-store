@@ -1,5 +1,6 @@
 "use client";
 
+import PageLoader from "@/app/components/PageLoader";
 import ProductCard from "@/app/components/ProductCard";
 import { useDeferredValue, useMemo, useState, useEffect } from "react";
 
@@ -74,9 +75,11 @@ export default function ProductsPage() {
       </section>
 
       {loading ? (
-        <div className="py-16 text-center text-stone-600">
-          Loading products...
-        </div>
+        <PageLoader
+          compact
+          label="Loading Products"
+          detail="We are arranging the latest jars and flavours for you."
+        />
       ) : filteredProducts.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           {filteredProducts.map((product) => (

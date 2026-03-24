@@ -1,0 +1,197 @@
+"use client";
+
+import AdminShell from "@/app/components/AdminShell";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+interface SiteSettingsForm {
+  brandName: string;
+  logoUrl: string;
+  manufacturerName: string;
+  manufacturerPhone: string;
+  manufacturerEmail: string;
+  manufacturerGstin: string;
+  manufacturerAddressLine1: string;
+  manufacturerAddressLine2: string;
+  manufacturerCity: string;
+  manufacturerState: string;
+  manufacturerPincode: string;
+}
+
+const initialForm: SiteSettingsForm = {
+  brandName: "",
+  logoUrl: "",
+  manufacturerName: "",
+  manufacturerPhone: "",
+  manufacturerEmail: "",
+  manufacturerGstin: "",
+  manufacturerAddressLine1: "",
+  manufacturerAddressLine2: "",
+  manufacturerCity: "",
+  manufacturerState: "",
+  manufacturerPincode: "",
+};
+
+export default function AdminSettingsPage() {
+  const router = useRouter();
+  const [form, setForm] = useState<SiteSettingsForm>(initialForm);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("admin-token");
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("/api/site-settings", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to fetch site settings");
+        }
+
+        setForm({
+          brandName: data.data.settings.brandName || "",
+          logoUrl: data.data.settings.logoUrl || "",
+          manufacturerName: data.data.settings.manufacturerName || "",
+          manufacturerPhone: data.data.settings.manufacturerPhone || "",
+          manufacturerEmail: data.data.settings.manufacturerEmail || "",
+          manufacturerGstin: data.data.settings.manufacturerGstin || "",
+          manufacturerAddressLine1:
+            data.data.settings.manufacturerAddressLine1 || "",
+          manufacturerAddressLine2:
+            data.data.settings.manufacturerAddressLine2 || "",
+          manufacturerCity: data.data.settings.manufacturerCity || "",
+          manufacturerState: data.data.settings.manufacturerState || "",
+          manufacturerPincode: data.data.settings.manufacturerPincode || "",
+        });
+      } catch (error) {
+        console.error("Error fetching site settings:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, [router]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = e.target;
+    setForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const res = await fetch("/api/site-settings", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("admin-token")}`,
+        },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to save site settings");
+      }
+    } catch (error) {
+      console.error("Error saving site settings:", error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <AdminShell
+        activeHref="/admin/settings"
+        title="Site Settings"
+        subtitle="These details are used in invoices and seller information."
+      >
+        <div className="rounded-xl border border-gray-200/50 bg-white p-10 text-center text-gray-600 shadow-sm">
+          Loading settings...
+        </div>
+      </AdminShell>
+    );
+  }
+
+  return (
+    <AdminShell
+      activeHref="/admin/settings"
+      title="Site Settings"
+      subtitle="These details are used in invoices and seller information."
+    >
+        <form onSubmit={handleSave} className="grid gap-6 lg:grid-cols-2">
+          <div className="space-y-6 rounded-xl border border-gray-200/50 bg-white p-6 shadow-sm">
+            <div>
+              <label className="mb-2 block font-bold text-gray-700">Brand Name</label>
+              <input name="brandName" value={form.brandName} onChange={handleChange} className="w-full rounded border border-gray-300 px-4 py-2" />
+            </div>
+            <div>
+              <label className="mb-2 block font-bold text-gray-700">Logo URL</label>
+              <input name="logoUrl" value={form.logoUrl} onChange={handleChange} className="w-full rounded border border-gray-300 px-4 py-2" />
+            </div>
+            <div>
+              <label className="mb-2 block font-bold text-gray-700">Manufacturer Name</label>
+              <input name="manufacturerName" value={form.manufacturerName} onChange={handleChange} className="w-full rounded border border-gray-300 px-4 py-2" />
+            </div>
+            <div>
+              <label className="mb-2 block font-bold text-gray-700">Phone</label>
+              <input name="manufacturerPhone" value={form.manufacturerPhone} onChange={handleChange} className="w-full rounded border border-gray-300 px-4 py-2" />
+            </div>
+            <div>
+              <label className="mb-2 block font-bold text-gray-700">Email</label>
+              <input name="manufacturerEmail" value={form.manufacturerEmail} onChange={handleChange} className="w-full rounded border border-gray-300 px-4 py-2" />
+            </div>
+            <div>
+              <label className="mb-2 block font-bold text-gray-700">GSTIN</label>
+              <input name="manufacturerGstin" value={form.manufacturerGstin} onChange={handleChange} className="w-full rounded border border-gray-300 px-4 py-2" />
+            </div>
+          </div>
+
+          <div className="space-y-6 rounded-xl border border-gray-200/50 bg-white p-6 shadow-sm">
+            <div>
+              <label className="mb-2 block font-bold text-gray-700">Address Line 1</label>
+              <textarea name="manufacturerAddressLine1" value={form.manufacturerAddressLine1} onChange={handleChange} rows={3} className="w-full rounded border border-gray-300 px-4 py-2" />
+            </div>
+            <div>
+              <label className="mb-2 block font-bold text-gray-700">Address Line 2</label>
+              <input name="manufacturerAddressLine2" value={form.manufacturerAddressLine2} onChange={handleChange} className="w-full rounded border border-gray-300 px-4 py-2" />
+            </div>
+            <div>
+              <label className="mb-2 block font-bold text-gray-700">City</label>
+              <input name="manufacturerCity" value={form.manufacturerCity} onChange={handleChange} className="w-full rounded border border-gray-300 px-4 py-2" />
+            </div>
+            <div>
+              <label className="mb-2 block font-bold text-gray-700">State</label>
+              <input name="manufacturerState" value={form.manufacturerState} onChange={handleChange} className="w-full rounded border border-gray-300 px-4 py-2" />
+            </div>
+            <div>
+              <label className="mb-2 block font-bold text-gray-700">Pincode</label>
+              <input name="manufacturerPincode" value={form.manufacturerPincode} onChange={handleChange} className="w-full rounded border border-gray-300 px-4 py-2" />
+            </div>
+            <button
+              type="submit"
+              disabled={saving}
+              className="rounded bg-purple-700 px-5 py-2 font-semibold text-white hover:bg-purple-800 disabled:bg-gray-400"
+            >
+              {saving ? "Saving..." : "Save Settings"}
+            </button>
+          </div>
+        </form>
+    </AdminShell>
+  );
+}

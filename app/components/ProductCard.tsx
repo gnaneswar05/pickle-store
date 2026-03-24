@@ -1,7 +1,8 @@
 "use client";
 
 import FallbackImage from "@/app/components/FallbackImage";
-import { useCart, useToast } from "@/app/store/useStore";
+import { useAuth, useCart, useToast } from "@/app/store/useStore";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface ProductCardProps {
@@ -19,11 +20,23 @@ export default function ProductCard({
   image,
   description,
 }: ProductCardProps) {
+  const { isAuthenticated } = useAuth();
   const { addItem } = useCart();
   const { pushToast } = useToast();
+  const router = useRouter();
   const [showPulse, setShowPulse] = useState(false);
 
   const handleAddToCart = () => {
+    if (!isAuthenticated()) {
+      pushToast({
+        title: "Login required",
+        message: "Please sign in before adding items to your cart.",
+        tone: "error",
+      });
+      router.push("/login");
+      return;
+    }
+
     addItem({
       productId: id,
       name,

@@ -1,5 +1,6 @@
 "use client";
 
+import AdminShell from "@/app/components/AdminShell";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -70,100 +71,41 @@ export default function AdminCouponsPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("admin-token");
-    router.push("/admin/login");
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Admin Header */}
-      <header className="bg-purple-700 text-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Kanvi Admin</h1>
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 px-4 py-2 rounded hover:bg-red-600"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation */}
-        <nav className="mb-8 bg-white rounded-lg shadow">
-          <div className="px-6 py-4 flex gap-4 overflow-x-auto">
-            <Link
-              href="/admin/dashboard"
-              className="text-gray-600 hover:text-purple-700"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/admin/products"
-              className="text-gray-600 hover:text-purple-700"
-            >
-              Products
-            </Link>
-            <Link
-              href="/admin/banners"
-              className="text-gray-600 hover:text-purple-700"
-            >
-              Banners
-            </Link>
-            <Link
-              href="/admin/orders"
-              className="text-gray-600 hover:text-purple-700"
-            >
-              Orders
-            </Link>
-            <Link
-              href="/admin/coupons"
-              className="text-purple-700 font-bold hover:text-purple-900"
-            >
-              Coupons
-            </Link>
-            <Link
-              href="/admin/taxes"
-              className="text-gray-600 hover:text-purple-700"
-            >
-              Taxes
-            </Link>
-          </div>
-        </nav>
-
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-900">Coupons</h2>
-          <Link
-            href="/admin/coupons/new"
-            className="bg-purple-700 text-white px-6 py-2 rounded hover:bg-purple-800"
-          >
-            Create Coupon
-          </Link>
-        </div>
-
+    <AdminShell
+      activeHref="/admin/coupons"
+      title="Coupons"
+      subtitle="Create and manage discounts for checkout."
+      actions={
+        <Link
+          href="/admin/coupons/new"
+          className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+        >
+          Create Coupon
+        </Link>
+      }
+    >
         {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">Loading...</p>
+          <div className="rounded-xl border border-gray-200/50 bg-white p-10 text-center text-gray-600 shadow-sm">
+            Loading coupons...
           </div>
         ) : coupons.length > 0 ? (
-          <div className="bg-white rounded-lg shadow overflow-x-auto">
+          <div className="overflow-x-auto rounded-xl border border-gray-200/50 bg-white shadow-sm">
             <table className="w-full">
-              <thead className="bg-gray-100 border-b">
+              <thead className="border-b bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left font-bold">Code</th>
-                  <th className="px-6 py-3 text-left font-bold">Type</th>
-                  <th className="px-6 py-3 text-left font-bold">Value</th>
-                  <th className="px-6 py-3 text-left font-bold">Usage</th>
-                  <th className="px-6 py-3 text-left font-bold">Expiry</th>
-                  <th className="px-6 py-3 text-left font-bold">Status</th>
-                  <th className="px-6 py-3 text-left font-bold">Actions</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Code</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Value</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Usage</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Expiry</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {coupons.map((coupon) => (
-                  <tr key={coupon._id} className="border-b hover:bg-gray-50">
+                  <tr key={coupon._id} className="border-b last:border-b-0 hover:bg-gray-50">
                     <td className="px-6 py-3 font-bold">{coupon.code}</td>
                     <td className="px-6 py-3">{coupon.discountType}</td>
                     <td className="px-6 py-3">{coupon.discountValue}</td>
@@ -208,13 +150,12 @@ export default function AdminCouponsPage() {
             <p className="text-gray-600 mb-4">No coupons yet</p>
             <Link
               href="/admin/coupons/new"
-              className="bg-purple-700 text-white px-6 py-2 rounded hover:bg-purple-800"
+              className="rounded-lg bg-green-600 px-6 py-2 text-white hover:bg-green-700"
             >
               Create First Coupon
             </Link>
           </div>
         )}
-      </div>
-    </div>
+    </AdminShell>
   );
 }

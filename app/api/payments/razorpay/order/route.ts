@@ -17,6 +17,18 @@ const razorpay = new Razorpay({
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
+
+    const publicKeyId =
+      process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
+
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      return errorResponse("Razorpay server keys are missing", 500);
+    }
+
+    if (!publicKeyId) {
+      return errorResponse("Razorpay public key is missing", 500);
+    }
+
     const { items, couponCode } = await request.json();
 
     if (!items || items.length === 0) {
@@ -75,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     return successResponse({
       razorpayOrder: order,
-      keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      keyId: publicKeyId,
       pricing,
     });
   } catch (error) {

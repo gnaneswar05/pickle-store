@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
     return successResponse({
       taxes: admin ? settings.taxes : activeTaxes,
       deliveryCharge: settings.deliveryCharge,
+      codLimit: settings.codLimit,
     });
   } catch (error) {
     return handleError(error);
@@ -61,6 +62,7 @@ export async function POST(request: NextRequest) {
         message: "Tax added successfully",
         taxes: settings.taxes,
         deliveryCharge: settings.deliveryCharge,
+        codLimit: settings.codLimit,
       },
       201,
     );
@@ -79,20 +81,41 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { deliveryCharge } = body;
+    const { deliveryCharge, codLimit } = body;
 
-    if (deliveryCharge === undefined || Number(deliveryCharge) < 0) {
+    if (
+      deliveryCharge !== undefined &&
+      Number.isNaN(Number(deliveryCharge))
+    ) {
       return errorResponse("Invalid delivery charge", 400);
     }
 
+    if (deliveryCharge !== undefined && Number(deliveryCharge) < 0) {
+      return errorResponse("Invalid delivery charge", 400);
+    }
+
+    if (codLimit !== undefined && Number.isNaN(Number(codLimit))) {
+      return errorResponse("Invalid COD limit", 400);
+    }
+
+    if (codLimit !== undefined && Number(codLimit) < 0) {
+      return errorResponse("Invalid COD limit", 400);
+    }
+
     const settings = await getTaxSettings();
-    settings.deliveryCharge = Number(deliveryCharge);
+    if (deliveryCharge !== undefined) {
+      settings.deliveryCharge = Number(deliveryCharge);
+    }
+    if (codLimit !== undefined) {
+      settings.codLimit = Number(codLimit);
+    }
     await settings.save();
 
     return successResponse({
-      message: "Delivery charge updated successfully",
+      message: "Settings updated successfully",
       taxes: settings.taxes,
       deliveryCharge: settings.deliveryCharge,
+      codLimit: settings.codLimit,
     });
   } catch (error) {
     return handleError(error);

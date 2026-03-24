@@ -10,6 +10,7 @@ export interface ITaxRate {
 export interface ITaxSetting extends Document {
   taxes: ITaxRate[];
   deliveryCharge: number;
+  codLimit: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,6 +44,11 @@ const TaxSettingSchema = new Schema(
     deliveryCharge: {
       type: Number,
       default: 0,
+      min: 0,
+    },
+    codLimit: {
+      type: Number,
+      default: 250,
       min: 0,
     },
   },

@@ -18,6 +18,7 @@ interface OrderDetail {
   discountAmount: number;
   paymentType: "COD" | "ONLINE";
   status: string;
+  shipperName?: string | null;
   createdAt: string;
   address: {
     name: string;
@@ -31,6 +32,9 @@ export default function AdminOrderDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [order, setOrder] = useState<OrderDetail | null>(null);
+  const [siteSettings, setSiteSettings] = useState<Record<string, string> | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
 
   const getOrderTotal = (value: OrderDetail) =>
@@ -49,18 +53,29 @@ export default function AdminOrderDetailPage() {
 
     const fetchOrder = async () => {
       try {
-        const res = await fetch(`/api/orders/${params.id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const data = await res.json();
+        const [orderRes, settingsRes] = await Promise.all([
+          fetch(`/api/orders/${params.id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch("/api/site-settings", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+        ]);
+        const orderData = await orderRes.json();
+        const settingsData = await settingsRes.json();
 
-        if (!res.ok) {
-          throw new Error(data.error || "Failed to fetch order");
+        if (!orderRes.ok) {
+          throw new Error(orderData.error || "Failed to fetch order");
         }
 
-        setOrder(data.data.order);
+        setOrder(orderData.data.order);
+        if (settingsRes.ok) {
+          setSiteSettings(settingsData.data.settings || settingsData.data);
+        }
       } catch (error) {
         console.error("Error fetching order:", error);
       } finally {
@@ -94,6 +109,9 @@ export default function AdminOrderDetailPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Kanvi Admin</h1>
           <div className="flex items-center gap-3">
+            <Link href="/admin/settings" className="rounded bg-white/15 px-4 py-2 text-sm font-semibold">
+              Settings
+            </Link>
             <Link href="/admin/taxes" className="rounded bg-white/15 px-4 py-2 text-sm font-semibold">
               Taxes
             </Link>
@@ -113,7 +131,11 @@ export default function AdminOrderDetailPage() {
           </p>
         </div>
 
-        <InvoiceCard order={{ ...order, totalAmount: getOrderTotal(order) }} onPrint={() => window.print()} />
+        <InvoiceCard
+          order={{ ...order, totalAmount: getOrderTotal(order) }}
+          siteSettings={siteSettings ?? undefined}
+          onPrint={() => window.print()}
+        />
       </div>
     </div>
   );

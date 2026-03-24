@@ -1,6 +1,7 @@
 "use client";
 
 import InvoiceCard from "@/app/components/InvoiceCard";
+import PageLoader from "@/app/components/PageLoader";
 import { useAuth } from "@/app/store/useStore";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -19,6 +20,7 @@ interface OrderDetail {
   discountAmount: number;
   paymentType: "COD" | "ONLINE";
   status: string;
+  shipperName?: string | null;
   createdAt: string;
   address: {
     name: string;
@@ -33,6 +35,9 @@ export default function OrderDetailPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [order, setOrder] = useState<OrderDetail | null>(null);
+  const [siteSettings, setSiteSettings] = useState<Record<string, string> | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
 
   const getOrderTotal = (value: OrderDetail) =>
@@ -50,18 +55,25 @@ export default function OrderDetailPage() {
 
     const fetchOrder = async () => {
       try {
-        const res = await fetch(`/api/orders/${params.id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("kanvi-token")}`,
-          },
-        });
-        const data = await res.json();
+        const [orderRes, settingsRes] = await Promise.all([
+          fetch(`/api/orders/${params.id}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("kanvi-token")}`,
+            },
+          }),
+          fetch("/api/site-settings"),
+        ]);
+        const orderData = await orderRes.json();
+        const settingsData = await settingsRes.json();
 
-        if (!res.ok) {
-          throw new Error(data.error || "Failed to fetch order");
+        if (!orderRes.ok) {
+          throw new Error(orderData.error || "Failed to fetch order");
         }
 
-        setOrder(data.data.order);
+        setOrder(orderData.data.order);
+        if (settingsRes.ok) {
+          setSiteSettings(settingsData.data);
+        }
       } catch (error) {
         console.error("Error fetching order:", error);
       } finally {
@@ -75,7 +87,13 @@ export default function OrderDetailPage() {
   }, [isAuthenticated, params.id, router]);
 
   if (loading) {
-    return <div className="py-16 text-center text-stone-600">Loading order...</div>;
+    return (
+      <PageLoader
+        compact
+        label="Loading Order"
+        detail="We are preparing your invoice, items, and delivery details."
+      />
+    );
   }
 
   if (!order) {
@@ -115,6 +133,7 @@ export default function OrderDetailPage() {
 
       <InvoiceCard
         order={{ ...order, totalAmount: getOrderTotal(order) }}
+        siteSettings={siteSettings ?? undefined}
         onPrint={() => window.print()}
       />
     </div>
