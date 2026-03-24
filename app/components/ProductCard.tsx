@@ -56,7 +56,7 @@ export default function ProductCard({
   };
 
   return (
-    <div className="group overflow-hidden rounded-[28px] border border-[rgba(84,53,33,0.08)] bg-[var(--surface-strong)] shadow-[0_18px_48px_rgba(92,60,37,0.07)] transition hover:-translate-y-1 hover:shadow-[0_26px_60px_rgba(92,60,37,0.14)]">
+    <div className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-[rgba(84,53,33,0.08)] bg-[var(--surface-strong)] shadow-[0_18px_48px_rgba(92,60,37,0.07)] transition hover:-translate-y-1 hover:shadow-[0_26px_60px_rgba(92,60,37,0.14)]">
       <div className="relative h-60 overflow-hidden rounded-[24px]">
         <div className="absolute inset-0 z-10 bg-gradient-to-t from-[rgba(45,27,18,0.16)] via-transparent to-transparent" />
         <FallbackImage
@@ -70,7 +70,7 @@ export default function ProductCard({
         </div>
       </div>
 
-      <div className="p-5">
+      <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-stone-500">
@@ -79,18 +79,16 @@ export default function ProductCard({
             <h3 className="mt-2 line-clamp-2 text-xl font-semibold leading-8 text-[var(--brand-deep)]">
               {name}
             </h3>
-            {description ? (
-              <p className="mt-2 line-clamp-2 text-sm leading-6 text-stone-600">
-                {description}
-              </p>
-            ) : null}
+            <p className="mt-2 min-h-12 line-clamp-2 text-sm leading-6 text-stone-600">
+              {description || "Authentic homemade pickle with bold flavor and rich masala."}
+            </p>
           </div>
           <div className="shrink-0 rounded-full bg-[rgba(215,163,71,0.18)] px-3 py-1.5 text-sm font-semibold text-[var(--brand-deep)]">
             Rs. {price}
           </div>
         </div>
 
-        <div className="mt-5 flex items-center justify-between gap-3 border-t border-[rgba(84,53,33,0.08)] pt-4">
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-[rgba(84,53,33,0.08)] pt-4">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-stone-500">
               Pantry Note

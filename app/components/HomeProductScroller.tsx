@@ -81,17 +81,19 @@ export default function HomeProductScroller({
             type="button"
             onClick={() => scrollByAmount("left")}
             disabled={!canScrollLeft}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--line)] bg-white/88 text-[var(--brand-deep)] shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Scroll left"
+            className="rounded-full border border-[var(--line)] bg-white/88 px-4 py-2 text-sm font-semibold text-[var(--brand-deep)] shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
           >
-            ←
+            Prev
           </button>
           <button
             type="button"
             onClick={() => scrollByAmount("right")}
             disabled={!canScrollRight}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--line)] bg-white/88 text-[var(--brand-deep)] shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Scroll right"
+            className="rounded-full border border-[var(--line)] bg-white/88 px-4 py-2 text-sm font-semibold text-[var(--brand-deep)] shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
           >
-            →
+            Next
           </button>
         </div>
       </div>
@@ -102,7 +104,7 @@ export default function HomeProductScroller({
 
         <div
           ref={trackRef}
-          className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-1 pb-3 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-5"
+          className="flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto px-1 pb-3 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-5"
         >
           {products.map((product) => (
             <div
@@ -110,7 +112,7 @@ export default function HomeProductScroller({
               className="shrink-0 w-[85%] min-w-[274px] max-w-[290px] snap-start md:w-[43%] md:min-w-[300px] md:max-w-[340px] xl:w-[31%] xl:min-w-[320px]"
             >
               <div
-                className={`rounded-[30px] bg-gradient-to-b ${frameTone} p-1 shadow-[0_18px_48px_rgba(92,60,37,0.1)]`}
+                className={`h-full rounded-[30px] bg-gradient-to-b ${frameTone} p-1 shadow-[0_18px_48px_rgba(92,60,37,0.1)]`}
               >
                 <ProductCard
                   id={product._id}
