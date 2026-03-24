@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🥒 Kanvi - Homemade Pickle Business Application
 
-## Getting Started
+Complete full-stack application for managing a homemade pickle business. Built with Next.js, MongoDB, and Tailwind CSS.
 
-First, run the development server:
+## ✅ Project Status: COMPLETE
+
+All user features, admin features, APIs, and database schemas have been fully implemented.
+
+## 🚀 Quick Start
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🎯 What's Included
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+✅ User Features
 
-## Learn More
+- OTP authentication with MongoDB
+- Product browsing (home, all, trending, seasonal)
+- Shopping cart with localStorage persistence
+- Checkout with address & payment method selection
+- Order placement, confirmation & tracking
 
-To learn more about Next.js, take a look at the following resources:
+✅ Admin Features
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Secure admin login & dashboard
+- Full product CRUD management
+- Homepage banner management
+- Order management with status updates
+- Coupon creation & validation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+✅ Complete Backend
 
-## Deploy on Vercel
+- All API routes implemented
+- MongoDB models with Mongoose
+- JWT authentication
+- Comprehensive error handling
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+✅ Full Database
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Users, Products, Orders, Coupons, Banners, Admin collections
+- Proper relationships & validation
+
+## 🛠 Tech Stack
+
+Next.js 16 • React 19 • MongoDB • Mongoose • Tailwind CSS 4 • Zustand • JWT
+
+## 📄 Configuration
+
+Create `.env.local`:
+
+```
+MONGODB_URI=your-mongodb-url
+JWT_SECRET=your-secret-key
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
+## 🔗 Key Routes
+
+User: / | /login | /products | /cart | /checkout | /orders  
+Admin: /admin/dashboard | /admin/products | /admin/banners | /admin/orders | /admin/coupons
+
+## 📖 Full Documentation
+
+For complete setup, deployment, API reference, and architecture details, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+
+---
+
+**🥒 Kanvi - Homemade Pickles, Delivered Fresh**

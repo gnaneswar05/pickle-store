@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7efe4;
+  --foreground: #2d1b12;
+  --surface: #fffaf3;
+  --surface-strong: #ffffff;
+  --brand: #9f3f23;
+  --brand-deep: #6d2410;
+  --accent: #d7a347;
+  --olive: #65704f;
+  --line: rgba(84, 53, 33, 0.12);
 }
 
 @theme inline {
@@ -12,15 +19,72 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(215, 163, 71, 0.22), transparent 26%),
+    radial-gradient(circle at top right, rgba(101, 112, 79, 0.16), transparent 20%),
+    linear-gradient(180deg, #fbf5ec 0%, #f7efe4 34%, #f4eadf 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), "Segoe UI", sans-serif;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(109, 36, 16, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(109, 36, 16, 0.025) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 90%);
+}
+
+a,
+button {
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+button:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+::selection {
+  background: rgba(159, 63, 35, 0.18);
+}
+
+@keyframes toast-slide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulse-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.8);
+  }
+  35% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.08);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-22px) scale(1.05);
+  }
 }
