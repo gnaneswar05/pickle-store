@@ -12,11 +12,6 @@ import { isPincodeServiceable } from "@/lib/utils/serviceable-pincodes";
 import { getSiteSettings } from "@/lib/utils/site-settings";
 import { validatePincode } from "@/lib/utils/validation";
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || "",
-  key_secret: process.env.RAZORPAY_KEY_SECRET || "",
-});
-
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
@@ -31,6 +26,11 @@ export async function POST(request: NextRequest) {
     if (!publicKeyId) {
       return errorResponse("Razorpay public key is missing", 500);
     }
+
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
 
     const { items, couponCode, address } = await request.json();
 
