@@ -21,6 +21,7 @@ interface SiteSettingsResponse {
   termsAndConditions?: string;
   privacyPolicy?: string;
   refundPolicy?: string;
+  homeTrendingEyebrow?: string;
 }
 
 const defaultSettings: Required<SiteSettingsResponse> = {
@@ -42,6 +43,7 @@ const defaultSettings: Required<SiteSettingsResponse> = {
   termsAndConditions: "Terms and conditions go here.",
   privacyPolicy: "Privacy policy goes here.",
   refundPolicy: "Refund policy goes here.",
+  homeTrendingEyebrow: "Most Loved",
 };
 
 export default function useSiteSettings() {
@@ -82,6 +84,7 @@ export default function useSiteSettings() {
           termsAndConditions: data.termsAndConditions || defaultSettings.termsAndConditions,
           privacyPolicy: data.privacyPolicy || defaultSettings.privacyPolicy,
           refundPolicy: data.refundPolicy || defaultSettings.refundPolicy,
+          homeTrendingEyebrow: data.homeTrendingEyebrow || defaultSettings.homeTrendingEyebrow,
         });
       } catch (error) {
         if (error instanceof Error && error.name === "AbortError") {

@@ -1,6 +1,7 @@
 "use client";
 
 import FallbackImage from "@/app/components/FallbackImage";
+import useSiteSettings from "@/app/components/useSiteSettings";
 import { useAuth, useCart, useToast } from "@/app/store/useStore";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -11,6 +12,7 @@ interface ProductCardProps {
   price: number;
   image: string;
   description?: string;
+  isTrending?: boolean;
 }
 
 export default function ProductCard({
@@ -19,11 +21,13 @@ export default function ProductCard({
   price,
   image,
   description,
+  isTrending,
 }: ProductCardProps) {
   const { isAuthenticated } = useAuth();
   const { items, addItem, updateQuantity, removeItem } = useCart();
   const cartItem = items.find((i) => i.productId === id);
   const { pushToast } = useToast();
+  const { homeTrendingEyebrow } = useSiteSettings();
   const router = useRouter();
   const [showPulse, setShowPulse] = useState(false);
 
@@ -56,9 +60,11 @@ export default function ProductCard({
           fill
           className="object-cover transition duration-500 group-hover:scale-105"
         />
-        <div className="absolute left-4 top-4 z-20 rounded-full border border-white/70 bg-[rgba(255,255,255,0.92)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--olive)] shadow-sm">
-          Most Loved
-        </div>
+        {isTrending && (
+          <div className="absolute left-4 top-4 z-20 rounded-full border border-[var(--line)] bg-white/95 backdrop-blur-sm px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--olive)] shadow-sm">
+            {homeTrendingEyebrow || "Most Loved"}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col p-5">

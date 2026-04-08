@@ -9,6 +9,7 @@ interface ProductItem {
   price: number;
   image: string;
   description?: string;
+  isTrending?: boolean;
 }
 
 interface HomeProductScrollerProps {
@@ -120,6 +121,7 @@ export default function HomeProductScroller({
                   price={product.price}
                   image={product.image}
                   description={product.description}
+                  isTrending={product.isTrending}
                 />
               </div>
             </div>
