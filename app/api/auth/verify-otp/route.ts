@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       const validatedProfile = validateProfileInput({ name, gender, email });
 
       if ("error" in validatedProfile) {
-        return errorResponse(validatedProfile.error, 400);
+        return errorResponse(validatedProfile.error || "Validation failed", 400);
       }
 
       const existingEmailUser = await User.findOne({

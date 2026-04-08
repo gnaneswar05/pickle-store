@@ -57,7 +57,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const validatedProfile = validateProfileInput(body);
     if ("error" in validatedProfile) {
-      return errorResponse(validatedProfile.error, 400);
+      return errorResponse(validatedProfile.error || "Validation failed", 400);
     }
 
     const phone = (body.phone || "").trim();
