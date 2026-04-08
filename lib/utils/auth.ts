@@ -34,8 +34,11 @@ export function verifyAdminToken(
   token: string,
 ): { adminId: string; role: string } | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    return decoded as { adminId: string; role: string };
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    if (decoded && decoded.adminId) {
+      return decoded as { adminId: string; role: string };
+    }
+    return null;
   } catch {
     return null;
   }

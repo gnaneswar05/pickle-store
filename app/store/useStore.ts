@@ -141,8 +141,23 @@ export const useToast = create<ToastStore>((set) => ({
 
 interface AuthStore {
   token: string | null;
-  user: { id: string; phone: string } | null;
-  setAuth: (token: string, user: { id: string; phone: string }) => void;
+  user: {
+    id: string;
+    phone: string;
+    name?: string;
+    gender?: string;
+    email?: string;
+  } | null;
+  setAuth: (
+    token: string,
+    user: {
+      id: string;
+      phone: string;
+      name?: string;
+      gender?: string;
+      email?: string;
+    },
+  ) => void;
   clearAuth: () => void;
   isAuthenticated: () => boolean;
 }
@@ -161,7 +176,16 @@ export const useAuth = create<AuthStore>((set, get) => {
     token: initial.token,
     user: initial.user,
 
-    setAuth: (token: string, user: { id: string; phone: string }) =>
+    setAuth: (
+      token: string,
+      user: {
+        id: string;
+        phone: string;
+        name?: string;
+        gender?: string;
+        email?: string;
+      },
+    ) =>
       set(() => {
         if (typeof window !== "undefined") {
           localStorage.setItem("kanvi-token", token);

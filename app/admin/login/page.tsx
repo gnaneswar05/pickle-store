@@ -1,6 +1,7 @@
 "use client";
 
 import FallbackImage from "@/app/components/FallbackImage";
+import useSiteSettings from "@/app/components/useSiteSettings";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -10,6 +11,7 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const siteSettings = useSiteSettings();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,8 +48,8 @@ export default function AdminLoginPage() {
         <div className="mb-8 text-center">
           <div className="mx-auto h-12 w-12 rounded-xl overflow-hidden mb-4">
             <FallbackImage
-              src="/kanvi-logo.png"
-              alt="Kanvi Logo"
+              src={siteSettings.logoUrl}
+              alt={`${siteSettings.brandName} logo`}
               width={48}
               height={48}
               className="object-cover"
@@ -55,7 +57,7 @@ export default function AdminLoginPage() {
             />
           </div>
           <h2 className="text-2xl font-semibold text-gray-900">
-            Sign in to Kanvi Admin
+            Sign in to {siteSettings.brandName} Admin
           </h2>
           <p className="text-gray-600 text-sm mt-2">
             Manage your store from the admin dashboard

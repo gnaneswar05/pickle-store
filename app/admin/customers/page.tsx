@@ -1,11 +1,15 @@
 "use client";
 
+import AdminShell from "@/app/components/AdminShell";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface Customer {
   _id: string;
+  name: string;
+  email: string;
+  gender: string;
   phone: string;
   isVerified: boolean;
   createdAt: string;
@@ -81,160 +85,124 @@ export default function AdminCustomersPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("admin-token");
-    router.push("/admin/login");
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-gray-200/50 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
-          <h1 className="text-xl font-semibold text-gray-900">Kanvi Admin</h1>
-          <button
-            onClick={handleLogout}
-            className="rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
-          >
-            Sign out
-          </button>
+    <AdminShell
+      activeHref="/admin/customers"
+      title="Customers"
+      subtitle={`Track verified signups, account details, and returning buyers. Total customers: ${totalCustomers}.`}
+      actions={
+        <button
+          type="button"
+          onClick={handleExport}
+          className="rounded-full bg-[#3b2317] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:-translate-y-0.5"
+        >
+          Export Customers
+        </button>
+      }
+    >
+      {loading ? (
+        <div className="rounded-[28px] border border-[#eadfce] bg-white p-10 text-center text-slate-600 shadow-[0_16px_45px_rgba(79,55,32,0.08)]">
+          Loading customers...
         </div>
-      </header>
+      ) : customers.length > 0 ? (
+        <>
+          <div className="overflow-hidden rounded-[28px] border border-[#eadfce] bg-white shadow-[0_16px_45px_rgba(79,55,32,0.08)]">
+            <div className="grid grid-cols-[1.3fr_1.2fr_0.7fr_0.9fr_0.7fr_0.8fr_0.8fr_0.7fr] gap-4 border-b border-[#f0e6d9] bg-[#fbf6ef] px-6 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              <p>Customer</p>
+              <p>Contact</p>
+              <p>Gender</p>
+              <p>Status</p>
+              <p>Orders</p>
+              <p>Total Spent</p>
+              <p>Joined</p>
+              <p>Action</p>
+            </div>
 
-      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
-        <nav className="mb-8 rounded-xl border border-gray-200/50 bg-white shadow-sm">
-          <div className="flex gap-8 px-6 py-4">
-            <Link href="/admin/dashboard" className="pb-2 text-sm font-medium text-gray-600 hover:text-gray-900">
-              Dashboard
-            </Link>
-            <Link href="/admin/products" className="pb-2 text-sm font-medium text-gray-600 hover:text-gray-900">
-              Products
-            </Link>
-            <Link href="/admin/banners" className="pb-2 text-sm font-medium text-gray-600 hover:text-gray-900">
-              Banners
-            </Link>
-            <Link href="/admin/orders" className="pb-2 text-sm font-medium text-gray-600 hover:text-gray-900">
-              Orders
-            </Link>
-            <Link href="/admin/customers" className="border-b-2 border-blue-600 pb-2 text-sm font-medium text-blue-600">
-              Customers
-            </Link>
-            <Link href="/admin/coupons" className="pb-2 text-sm font-medium text-gray-600 hover:text-gray-900">
-              Coupons
-            </Link>
-            <Link href="/admin/taxes" className="pb-2 text-sm font-medium text-gray-600 hover:text-gray-900">
-              Taxes
-            </Link>
-            <Link href="/admin/settings" className="pb-2 text-sm font-medium text-gray-600 hover:text-gray-900">
-              Settings
-            </Link>
+            <div className="divide-y divide-[#f5ede2]">
+              {customers.map((customer) => (
+                <div
+                  key={customer._id}
+                  className="grid grid-cols-1 gap-4 px-6 py-5 text-sm md:grid-cols-[1.3fr_1.2fr_0.7fr_0.9fr_0.7fr_0.8fr_0.8fr_0.7fr]"
+                >
+                  <div>
+                    <p className="font-semibold text-[#2f1b12]">
+                      {customer.name || "Unnamed customer"}
+                    </p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-400">
+                      {customer.phone}
+                    </p>
+                  </div>
+                  <div className="text-slate-600">
+                    <p>{customer.email || "-"}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-400">
+                      Customer ID
+                    </p>
+                  </div>
+                  <p className="capitalize text-slate-600">
+                    {customer.gender || "-"}
+                  </p>
+                  <div>
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                        customer.isVerified
+                          ? "bg-[#e5f3e4] text-[#2f6b2d]"
+                          : "bg-[#f8e8cf] text-[#9a661d]"
+                      }`}
+                    >
+                      {customer.isVerified ? "Verified" : "Pending"}
+                    </span>
+                  </div>
+                  <p className="font-semibold text-[#2f1b12]">
+                    {customer.totalOrders}
+                  </p>
+                  <p className="font-semibold text-[#2f1b12]">
+                    Rs. {customer.totalSpent.toFixed(2)}
+                  </p>
+                  <p className="text-slate-600">
+                    {new Date(customer.createdAt).toLocaleDateString()}
+                  </p>
+                  <div>
+                    <Link
+                      href={`/admin/customers/${customer._id}/edit`}
+                      className="rounded-full bg-[#3b2317] px-4 py-2 text-xs font-semibold text-white"
+                    >
+                      Edit
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </nav>
 
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-semibold text-gray-900">Customers</h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Total customers: {totalCustomers}
+          <div className="mt-4 flex items-center justify-between rounded-[24px] border border-[#eadfce] bg-white px-5 py-4 shadow-[0_16px_45px_rgba(79,55,32,0.06)]">
+            <button
+              type="button"
+              onClick={() => setPage((current) => Math.max(current - 1, 1))}
+              disabled={page <= 1}
+              className="rounded-full border border-[#dccab3] px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <p className="text-sm text-slate-600">
+              Page {page} of {totalPages}
             </p>
+            <button
+              type="button"
+              onClick={() =>
+                setPage((current) => Math.min(current + 1, totalPages))
+              }
+              disabled={page >= totalPages}
+              className="rounded-full border border-[#dccab3] px-4 py-2 text-sm font-semibold text-slate-700 disabled:opacity-50"
+            >
+              Next
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleExport}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-          >
-            Export Customers
-          </button>
+        </>
+      ) : (
+        <div className="rounded-[28px] border border-[#eadfce] bg-white p-10 text-center text-slate-600 shadow-[0_16px_45px_rgba(79,55,32,0.08)]">
+          No customers yet.
         </div>
-
-        {loading ? (
-          <div className="rounded-xl border border-gray-200/50 bg-white p-10 text-center text-gray-600 shadow-sm">
-            Loading customers...
-          </div>
-        ) : customers.length > 0 ? (
-          <>
-            <div className="overflow-x-auto rounded-xl border border-gray-200/50 bg-white shadow-sm">
-              <table className="w-full">
-                <thead className="border-b bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                      Mobile Number
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                      Verified
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                      Joined
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                      Orders
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                      Total Spent
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                      Last Order
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {customers.map((customer) => (
-                    <tr key={customer._id} className="border-b last:border-b-0 hover:bg-gray-50">
-                      <td className="px-6 py-4 font-medium text-gray-900">
-                        {customer.phone}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
-                        {customer.isVerified ? "Verified" : "Pending"}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
-                        {new Date(customer.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
-                        {customer.totalOrders}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                        Rs. {customer.totalSpent.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
-                        {customer.lastOrderDate
-                          ? new Date(customer.lastOrderDate).toLocaleDateString()
-                          : "-"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="mt-4 flex items-center justify-between rounded-xl border border-gray-200/50 bg-white px-6 py-4 shadow-sm">
-              <button
-                type="button"
-                onClick={() => setPage((current) => Math.max(current - 1, 1))}
-                disabled={page <= 1}
-                className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <p className="text-sm text-gray-600">
-                Page {page} of {totalPages}
-              </p>
-              <button
-                type="button"
-                onClick={() =>
-                  setPage((current) => Math.min(current + 1, totalPages))
-                }
-                disabled={page >= totalPages}
-                className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          </>
-        ) : (
-          <div className="rounded-xl border border-gray-200/50 bg-white p-10 text-center text-gray-600 shadow-sm">
-            No customers yet.
-          </div>
-        )}
-      </div>
-    </div>
+      )}
+    </AdminShell>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import AdminShell from "@/app/components/AdminShell";
 import InvoiceCard from "@/app/components/InvoiceCard";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -32,17 +33,14 @@ export default function AdminOrderDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [order, setOrder] = useState<OrderDetail | null>(null);
-  const [siteSettings, setSiteSettings] = useState<Record<string, string> | null>(
-    null,
-  );
+  const [siteSettings, setSiteSettings] = useState<Record<string, string> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [shipperName, setShipperName] = useState("");
 
   const getOrderTotal = (value: OrderDetail) =>
     value.totalAmount ??
-    value.items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0,
-    );
+    value.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   useEffect(() => {
     const token = localStorage.getItem("admin-token");
@@ -54,28 +52,17 @@ export default function AdminOrderDetailPage() {
     const fetchOrder = async () => {
       try {
         const [orderRes, settingsRes] = await Promise.all([
-          fetch(`/api/orders/${params.id}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
-          fetch("/api/site-settings", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
+          fetch(`/api/orders/${params.id}`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch("/api/site-settings", { headers: { Authorization: `Bearer ${token}` } }),
         ]);
         const orderData = await orderRes.json();
         const settingsData = await settingsRes.json();
 
-        if (!orderRes.ok) {
-          throw new Error(orderData.error || "Failed to fetch order");
-        }
-
+        if (!orderRes.ok) throw new Error(orderData.error);
+        
         setOrder(orderData.data.order);
-        if (settingsRes.ok) {
-          setSiteSettings(settingsData.data.settings || settingsData.data);
-        }
+        setShipperName(orderData.data.order.shipperName || "");
+        if (settingsRes.ok) setSiteSettings(settingsData.data.settings || settingsData.data);
       } catch (error) {
         console.error("Error fetching order:", error);
       } finally {
@@ -83,60 +70,104 @@ export default function AdminOrderDetailPage() {
       }
     };
 
-    if (params.id) {
-      fetchOrder();
-    }
+    if (params.id) fetchOrder();
   }, [params.id, router]);
 
+  const handleUpdateStatus = async (newStatus: string) => {
+    if (!order) return;
+    
+    if (newStatus === "SHIPPED" && !shipperName.trim()) {
+      alert("Please enter a Shipper Name before marking as SHIPPED.");
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      const res = await fetch(`/api/orders/${order._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("admin-token")}`,
+        },
+        body: JSON.stringify({ status: newStatus, shipperName }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      
+      setOrder(data.data.order);
+      alert("Order status updated successfully!");
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Failed to update order");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   if (loading) {
-    return <div className="py-16 text-center text-gray-600">Loading order...</div>;
+    return (
+      <AdminShell activeHref="/admin/orders" title="Order Details" subtitle="Loading invoice data...">
+        <div className="py-16 text-center text-gray-500">Loading order...</div>
+      </AdminShell>
+    );
   }
 
   if (!order) {
     return (
-      <div className="py-16 text-center">
-        <p className="text-gray-600">Order not found.</p>
-        <Link href="/admin/orders" className="mt-4 inline-block text-blue-700">
-          Back to orders
-        </Link>
-      </div>
+      <AdminShell activeHref="/admin/orders" title="Order Not Found" subtitle="Could not locate this order.">
+        <div className="py-16 text-center">
+          <Link href="/admin/orders" className="text-gray-900 underline">Back to orders</Link>
+        </div>
+      </AdminShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-purple-700 text-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Kanvi Admin</h1>
-          <div className="flex items-center gap-3">
-            <Link href="/admin/settings" className="rounded bg-white/15 px-4 py-2 text-sm font-semibold">
-              Settings
-            </Link>
-            <Link href="/admin/taxes" className="rounded bg-white/15 px-4 py-2 text-sm font-semibold">
-              Taxes
-            </Link>
-            <Link href="/admin/orders" className="rounded bg-white/15 px-4 py-2 text-sm font-semibold">
-              Back
-            </Link>
+    <AdminShell activeHref="/admin/orders" title={`Order #${order.invoiceNumber || order._id.slice(-8).toUpperCase()}`} subtitle={`${new Date(order.createdAt).toLocaleString()} • ${order.paymentType} • ${order.status}`}>
+      
+      <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm print:hidden">
+        <h3 className="mb-4 font-bold text-gray-900">Manage Order Fulfillment</h3>
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="flex-1 min-w-[200px]">
+            <label className="mb-2 block text-sm font-semibold text-gray-600">Update Status</label>
+            <select
+              value={order.status}
+              disabled={updating}
+              onChange={(e) => handleUpdateStatus(e.target.value)}
+              className="w-full rounded border border-gray-300 bg-white px-4 py-2 font-medium text-gray-900"
+            >
+              <option value="PENDING">PENDING</option>
+              <option value="CONFIRMED">CONFIRMED</option>
+              <option value="PREPARING">PREPARING</option>
+              <option value="SHIPPED">SHIPPED</option>
+              <option value="DELIVERED">DELIVERED</option>
+            </select>
           </div>
+          <div className="flex-1 min-w-[200px]">
+            <label className="mb-2 block text-sm font-semibold text-gray-600">Shipper / Tracking Name</label>
+            <input
+              type="text"
+              value={shipperName}
+              onChange={(e) => setShipperName(e.target.value)}
+              placeholder="e.g. BlueDart / Kanvi Direct"
+              disabled={updating}
+              className="w-full rounded border border-gray-300 bg-white px-4 py-2 text-gray-900"
+            />
+          </div>
+          <button
+            onClick={() => handleUpdateStatus(order.status)}
+            disabled={updating}
+            className="rounded bg-gray-900 px-6 py-2 font-bold text-white transition hover:bg-gray-800 disabled:opacity-50"
+          >
+            {updating ? "Saving..." : "Save Shipper"}
+          </button>
         </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-3xl font-bold text-gray-900">Order #{order._id}</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            {new Date(order.createdAt).toLocaleString()} • {order.paymentType} •{" "}
-            {order.status}
-          </p>
-        </div>
-
-        <InvoiceCard
-          order={{ ...order, totalAmount: getOrderTotal(order) }}
-          siteSettings={siteSettings ?? undefined}
-          onPrint={() => window.print()}
-        />
       </div>
-    </div>
+
+      <InvoiceCard
+        order={{ ...order, totalAmount: getOrderTotal(order) }}
+        siteSettings={siteSettings ?? undefined}
+        onPrint={() => window.print()}
+      />
+    </AdminShell>
   );
 }

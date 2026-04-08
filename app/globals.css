@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7efe4;
-  --foreground: #2d1b12;
-  --surface: #fffaf3;
+  --background: #ffffff;
+  --foreground: #000000;
+  --surface: #f9f9f9;
   --surface-strong: #ffffff;
-  --brand: #9f3f23;
-  --brand-deep: #6d2410;
-  --accent: #d7a347;
-  --olive: #65704f;
-  --line: rgba(84, 53, 33, 0.12);
+  --brand: #000000;
+  --brand-deep: #000000;
+  --accent: #f0f0f0;
+  --olive: #666666;
+  --line: rgba(0, 0, 0, 0.1);
 }
 
 @theme inline {
@@ -23,50 +23,108 @@ html {
   scroll-behavior: smooth;
 }
 
-body {
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(215, 163, 71, 0.22), transparent 26%),
-    radial-gradient(circle at top right, rgba(101, 112, 79, 0.16), transparent 20%),
-    linear-gradient(180deg, #fbf5ec 0%, #f7efe4 34%, #f4eadf 100%);
-  color: var(--foreground);
-  font-family: var(--font-sans), "Segoe UI", sans-serif;
+@media screen {
+  body {
+    min-height: 100vh;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans), "Segoe UI", sans-serif;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 1), transparent 95%);
+  }
+
+  /* Minimalist Overrides */
+  .bg-white, .bg-white\/60, .bg-white\/80 {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    color: var(--foreground) !important;
+  }
+
+  .text-stone-500, .text-stone-600, .text-stone-700, .text-gray-600, .text-gray-700, .text-gray-900 {
+    color: #444444 !important;
+  }
+
+  .border-gray-300 {
+    border-color: rgba(0, 0, 0, 0.15) !important;
+  }
+
+  input, textarea, select {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .bg-\[linear-gradient\(160deg\,rgba\(109\,36\,16\,0\.96\)\,rgba\(159\,63\,35\,0\.9\)\,rgba\(215\,163\,71\,0\.82\)\)\] {
+    background: #000000 !important;
+  }
+
+  .bg-\[linear-gradient\(180deg\,\#fffaf3\,\#fff\)\] {
+    background: #ffffff !important;
+  }
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(109, 36, 16, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(109, 36, 16, 0.025) 1px, transparent 1px);
-  background-size: 24px 24px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 90%);
+@media print {
+  @page {
+    margin: 0;
+  }
+  body {
+    padding: 15mm;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  .print-region, .print-region * {
+    visibility: visible !important;
+  }
+  .print-region {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
 }
 
 a,
 button {
   transition:
-    transform 0.2s ease,
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
     background-color 0.2s ease,
     color 0.2s ease,
     border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease !important;
 }
 
 button:active {
-  transform: translateY(1px) scale(0.99);
+  transform: translateY(2px) scale(0.98);
 }
 
 ::selection {
-  background: rgba(159, 63, 35, 0.18);
+  background: rgba(0, 0, 0, 0.15);
+  color: #000;
 }
 
 @keyframes toast-slide {
   from {
     opacity: 0;
-    transform: translateY(-10px) scale(0.98);
+    transform: translateY(-16px) scale(0.94);
   }
   to {
     opacity: 1;
@@ -77,15 +135,15 @@ button:active {
 @keyframes pulse-pop {
   0% {
     opacity: 0;
-    transform: translateY(8px) scale(0.8);
+    transform: translateY(12px) scale(0.9);
   }
-  35% {
+  40% {
     opacity: 1;
-    transform: translateY(-2px) scale(1.08);
+    transform: translateY(-4px) scale(1.1);
   }
   100% {
     opacity: 0;
-    transform: translateY(-22px) scale(1.05);
+    transform: translateY(-32px) scale(1.05);
   }
 }
 
@@ -95,14 +153,14 @@ button:active {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-8px);
+    transform: translateY(-10px);
   }
 }
 
 @keyframes menu-rise {
   from {
     opacity: 0;
-    transform: translateY(-10px) scale(0.98);
+    transform: translateY(-12px) scale(0.98);
   }
   to {
     opacity: 1;

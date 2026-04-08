@@ -196,7 +196,7 @@ export default function AdminOrdersPage() {
           <button
             type="button"
             onClick={handleExport}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-800"
           >
             Export CSV
           </button>
@@ -251,7 +251,7 @@ export default function AdminOrdersPage() {
                           onChange={(e) =>
                             handleStatusChange(order._id, e.target.value)
                           }
-                          className="border rounded px-2 py-1"
+                          className="min-w-[130px] rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 outline-none transition hover:border-gray-400 focus:border-gray-900"
                         >
                           {statusOptions.map((status) => (
                             <option key={status} value={status}>
@@ -269,7 +269,7 @@ export default function AdminOrdersPage() {
                       <td className="px-6 py-3 text-sm">
                         <Link
                           href={`/admin/orders/${order._id}`}
-                          className="font-medium text-blue-600 hover:underline"
+                          className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-1.5 text-xs font-bold text-gray-800 shadow-sm transition hover:border-gray-400 hover:bg-gray-50"
                         >
                           Open
                         </Link>

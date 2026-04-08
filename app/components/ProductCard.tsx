@@ -21,22 +21,13 @@ export default function ProductCard({
   description,
 }: ProductCardProps) {
   const { isAuthenticated } = useAuth();
-  const { addItem } = useCart();
+  const { items, addItem, updateQuantity, removeItem } = useCart();
+  const cartItem = items.find((i) => i.productId === id);
   const { pushToast } = useToast();
   const router = useRouter();
   const [showPulse, setShowPulse] = useState(false);
 
   const handleAddToCart = () => {
-    if (!isAuthenticated()) {
-      pushToast({
-        title: "Login required",
-        message: "Please sign in before adding items to your cart.",
-        tone: "error",
-      });
-      router.push("/login");
-      return;
-    }
-
     addItem({
       productId: id,
       name,
@@ -95,18 +86,45 @@ export default function ProductCard({
             </p>
             <p className="mt-1 text-sm text-stone-700">Tangy, spicy, meal-ready.</p>
           </div>
-          <div className="relative">
-            {showPulse ? (
+          <div className="relative min-w-[120px]">
+            {showPulse && !cartItem ? (
               <span className="pointer-events-none absolute -top-7 right-4 text-sm font-bold text-[var(--brand)] animate-[pulse-pop_.65s_ease-out]">
                 +1
               </span>
             ) : null}
-            <button
-              onClick={handleAddToCart}
-              className="rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:-translate-y-0.5 hover:bg-[var(--brand-deep)]"
-            >
-              Add to Cart
-            </button>
+            {cartItem ? (
+              <div className="flex h-10 w-full items-center justify-between gap-3 rounded-full border border-[var(--brand)] bg-[rgba(232,76,34,0.1)] px-2">
+                <button
+                  onClick={() => {
+                    if (cartItem.quantity <= 1) {
+                      removeItem(id);
+                      pushToast({ title: `${name} removed from cart`, tone: "info" });
+                    } else {
+                      updateQuantity(id, cartItem.quantity - 1);
+                    }
+                  }}
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-lg font-bold text-[var(--brand)] transition hover:bg-[var(--brand)] hover:text-white"
+                >
+                  -
+                </button>
+                <span className="min-w-4 text-center text-sm font-bold text-[var(--foreground)]">
+                  {cartItem.quantity}
+                </span>
+                <button
+                  onClick={() => updateQuantity(id, cartItem.quantity + 1)}
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-lg font-bold text-[var(--brand)] transition hover:bg-[var(--brand)] hover:text-white"
+                >
+                  +
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleAddToCart}
+                className="w-full rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:-translate-y-0.5 hover:bg-[var(--brand-deep)] flex justify-center"
+              >
+                Add to Cart
+              </button>
+            )}
           </div>
         </div>
       </div>

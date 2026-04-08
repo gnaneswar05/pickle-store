@@ -35,6 +35,9 @@ export async function GET(request: NextRequest) {
 
     const header = [
       "Customer ID",
+      "Name",
+      "Email",
+      "Gender",
       "Mobile Number",
       "Verified",
       "Joined On",
@@ -47,6 +50,9 @@ export async function GET(request: NextRequest) {
       const stat = statsMap.get(String(customer._id));
       return [
         String(customer._id),
+        customer.name || "",
+        customer.email || "",
+        customer.gender || "",
         customer.phone,
         customer.isVerified,
         new Date(customer.createdAt).toISOString(),

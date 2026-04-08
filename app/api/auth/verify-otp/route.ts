@@ -7,13 +7,17 @@ import {
   successResponse,
   handleError,
 } from "@/lib/utils/response";
+import {
+  isProfileComplete,
+  validateProfileInput,
+} from "@/lib/utils/user-profile";
 import { validatePhone } from "@/lib/utils/validation";
 
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
 
-    const { phone, otp } = await request.json();
+    const { phone, otp, name, gender, email } = await request.json();
 
     // Validation
     if (!phone || !validatePhone(phone)) {
@@ -41,22 +45,62 @@ export async function POST(request: NextRequest) {
       return errorResponse("Invalid OTP", 400);
     }
 
-    // Mark user as verified
-    user.isVerified = true;
-    user.otp = null;
-    user.otpExpiry = null;
+    const updatePayload: {
+      isVerified: boolean;
+      otp: null;
+      otpExpiry: null;
+      name?: string;
+      gender?: "male" | "female" | "other";
+      email?: string;
+    } = {
+      isVerified: true,
+      otp: null,
+      otpExpiry: null,
+    };
 
-    await user.save();
+    if (!isProfileComplete(user)) {
+      const validatedProfile = validateProfileInput({ name, gender, email });
+
+      if ("error" in validatedProfile) {
+        return errorResponse(validatedProfile.error, 400);
+      }
+
+      const existingEmailUser = await User.findOne({
+        email: validatedProfile.email,
+        _id: { $ne: user._id },
+      });
+
+      if (existingEmailUser) {
+        return errorResponse("Email already in use", 400);
+      }
+
+      updatePayload.name = validatedProfile.name;
+      updatePayload.gender = validatedProfile.gender;
+      updatePayload.email = validatedProfile.email;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      { $set: updatePayload },
+      { new: true, runValidators: true },
+    );
+
+    if (!updatedUser) {
+      return errorResponse("User not found", 404);
+    }
 
     // Generate JWT token
-    const token = generateToken(user._id.toString());
+    const token = generateToken(updatedUser._id.toString());
 
     return successResponse({
       message: "Login successful",
       token,
       user: {
-        id: user._id,
-        phone: user.phone,
+        id: updatedUser._id,
+        phone: updatedUser.phone,
+        name: updatedUser.name,
+        gender: updatedUser.gender,
+        email: updatedUser.email,
       },
     });
   } catch (error) {

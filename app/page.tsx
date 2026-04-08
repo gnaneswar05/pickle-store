@@ -3,16 +3,18 @@ import HomeProductScroller from "@/app/components/HomeProductScroller";
 import connectDB from "@/lib/db";
 import Banner from "@/lib/models/Banner";
 import Product from "@/lib/models/Product";
+import { getSiteSettings } from "@/lib/utils/site-settings";
 import Link from "next/link";
 
 async function getHomeData() {
   try {
     await connectDB();
 
-    const [banners, trendingProducts, seasonalProducts] = await Promise.all([
+    const [banners, trendingProducts, seasonalProducts, siteSettings] = await Promise.all([
       Banner.find({ isActive: true }).sort({ order: 1 }),
       Product.find({ isActive: true, isTrending: true }).limit(8),
       Product.find({ isActive: true, isSeasonal: true }).limit(8),
+      getSiteSettings(),
     ]);
 
     return {
@@ -35,6 +37,16 @@ async function getHomeData() {
         image: product.image,
         description: product.description,
       })),
+      homepageContent: {
+        homeTrendingEyebrow: siteSettings.homeTrendingEyebrow,
+        homeTrendingTitle: siteSettings.homeTrendingTitle,
+        homeTrendingDescription: siteSettings.homeTrendingDescription,
+        homeTrendingButtonLabel: siteSettings.homeTrendingButtonLabel,
+        homeSeasonalEyebrow: siteSettings.homeSeasonalEyebrow,
+        homeSeasonalTitle: siteSettings.homeSeasonalTitle,
+        homeSeasonalDescription: siteSettings.homeSeasonalDescription,
+        homeSeasonalButtonLabel: siteSettings.homeSeasonalButtonLabel,
+      },
     };
   } catch (error) {
     console.error("Error fetching home data:", error);
@@ -42,12 +54,25 @@ async function getHomeData() {
       banners: [],
       trendingProducts: [],
       seasonalProducts: [],
+      homepageContent: {
+        homeTrendingEyebrow: "Most Loved",
+        homeTrendingTitle: "Fan-favourite jars with a premium shelf feel",
+        homeTrendingDescription:
+          "This row is styled like a curated collection instead of a plain list, so customers get a more premium browse experience.",
+        homeTrendingButtonLabel: "View all products",
+        homeSeasonalEyebrow: "Seasonal Spotlight",
+        homeSeasonalTitle: "Limited runs worth catching before they disappear",
+        homeSeasonalDescription:
+          "A softer editorial section that feels distinct from the main best-seller shelf while still keeping the premium rhythm.",
+        homeSeasonalButtonLabel: "Browse collection",
+      },
     };
   }
 }
 
 export default async function HomePage() {
-  const { banners, trendingProducts, seasonalProducts } = await getHomeData();
+  const { banners, trendingProducts, seasonalProducts, homepageContent } =
+    await getHomeData();
 
   return (
     <div className="space-y-14">
@@ -58,21 +83,20 @@ export default async function HomePage() {
           <div className="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--brand)]">
-                Most Loved
+                {homepageContent.homeTrendingEyebrow}
               </p>
               <h2 className="mt-2 text-3xl font-semibold text-[var(--brand-deep)] md:text-4xl">
-                Fan-favourite jars with a premium shelf feel
+                {homepageContent.homeTrendingTitle}
               </h2>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600">
-                This row is styled like a curated collection instead of a plain
-                list, so customers get a more premium browse experience.
+                {homepageContent.homeTrendingDescription}
               </p>
             </div>
             <Link
               href="/products"
               className="inline-flex rounded-full border border-[var(--line)] bg-white px-5 py-3 text-sm font-semibold text-[var(--brand-deep)] shadow-sm"
             >
-              View all products
+              {homepageContent.homeTrendingButtonLabel}
             </Link>
           </div>
           <HomeProductScroller products={trendingProducts} accent="warm" />
@@ -84,21 +108,20 @@ export default async function HomePage() {
           <div className="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--olive)]">
-                Seasonal Spotlight
+                {homepageContent.homeSeasonalEyebrow}
               </p>
               <h2 className="mt-2 text-3xl font-semibold text-[var(--brand-deep)] md:text-4xl">
-                Limited runs worth catching before they disappear
+                {homepageContent.homeSeasonalTitle}
               </h2>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600">
-                A softer editorial section that feels distinct from the main
-                best-seller shelf while still keeping the premium rhythm.
+                {homepageContent.homeSeasonalDescription}
               </p>
             </div>
             <Link
               href="/products"
               className="inline-flex rounded-full border border-[var(--line)] bg-white px-5 py-3 text-sm font-semibold text-[var(--brand-deep)] shadow-sm"
             >
-              Browse collection
+              {homepageContent.homeSeasonalButtonLabel}
             </Link>
           </div>
           <HomeProductScroller products={seasonalProducts} accent="olive" />

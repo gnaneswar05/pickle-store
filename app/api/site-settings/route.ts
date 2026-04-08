@@ -19,7 +19,16 @@ export async function GET(request: NextRequest) {
     if (!admin) {
       return successResponse({
         brandName: settings.brandName,
+        brandTagline: settings.brandTagline,
         logoUrl: settings.logoUrl,
+        homeTrendingEyebrow: settings.homeTrendingEyebrow,
+        homeTrendingTitle: settings.homeTrendingTitle,
+        homeTrendingDescription: settings.homeTrendingDescription,
+        homeTrendingButtonLabel: settings.homeTrendingButtonLabel,
+        homeSeasonalEyebrow: settings.homeSeasonalEyebrow,
+        homeSeasonalTitle: settings.homeSeasonalTitle,
+        homeSeasonalDescription: settings.homeSeasonalDescription,
+        homeSeasonalButtonLabel: settings.homeSeasonalButtonLabel,
         manufacturerName: settings.manufacturerName,
         manufacturerPhone: settings.manufacturerPhone,
         manufacturerEmail: settings.manufacturerEmail,
@@ -30,6 +39,12 @@ export async function GET(request: NextRequest) {
         manufacturerState: settings.manufacturerState,
         manufacturerPincode: settings.manufacturerPincode,
         serviceablePincodes: settings.serviceablePincodes,
+        aboutUsTitle: settings.aboutUsTitle,
+        aboutUsContent: settings.aboutUsContent,
+        aboutUsImage: settings.aboutUsImage,
+        termsAndConditions: settings.termsAndConditions,
+        privacyPolicy: settings.privacyPolicy,
+        refundPolicy: settings.refundPolicy,
       });
     }
 
@@ -64,7 +79,22 @@ export async function PUT(request: NextRequest) {
 
     settings.set({
       brandName: body.brandName ?? settings.brandName,
+      brandTagline: body.brandTagline ?? settings.brandTagline,
       logoUrl: body.logoUrl ?? settings.logoUrl,
+      homeTrendingEyebrow:
+        body.homeTrendingEyebrow ?? settings.homeTrendingEyebrow,
+      homeTrendingTitle: body.homeTrendingTitle ?? settings.homeTrendingTitle,
+      homeTrendingDescription:
+        body.homeTrendingDescription ?? settings.homeTrendingDescription,
+      homeTrendingButtonLabel:
+        body.homeTrendingButtonLabel ?? settings.homeTrendingButtonLabel,
+      homeSeasonalEyebrow:
+        body.homeSeasonalEyebrow ?? settings.homeSeasonalEyebrow,
+      homeSeasonalTitle: body.homeSeasonalTitle ?? settings.homeSeasonalTitle,
+      homeSeasonalDescription:
+        body.homeSeasonalDescription ?? settings.homeSeasonalDescription,
+      homeSeasonalButtonLabel:
+        body.homeSeasonalButtonLabel ?? settings.homeSeasonalButtonLabel,
       manufacturerName: body.manufacturerName ?? settings.manufacturerName,
       manufacturerPhone: body.manufacturerPhone ?? settings.manufacturerPhone,
       manufacturerEmail: body.manufacturerEmail ?? settings.manufacturerEmail,
@@ -78,6 +108,12 @@ export async function PUT(request: NextRequest) {
       manufacturerPincode:
         body.manufacturerPincode ?? settings.manufacturerPincode,
       serviceablePincodes,
+      aboutUsTitle: body.aboutUsTitle ?? settings.aboutUsTitle,
+      aboutUsContent: body.aboutUsContent ?? settings.aboutUsContent,
+      aboutUsImage: body.aboutUsImage ?? settings.aboutUsImage,
+      termsAndConditions: body.termsAndConditions ?? settings.termsAndConditions,
+      privacyPolicy: body.privacyPolicy ?? settings.privacyPolicy,
+      refundPolicy: body.refundPolicy ?? settings.refundPolicy,
     });
 
     await settings.save();

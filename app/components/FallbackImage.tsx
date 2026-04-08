@@ -10,11 +10,20 @@ interface FallbackImageProps extends Omit<ImageProps, "src"> {
 
 const isValidImageSrc = (src: string): boolean => {
   if (!src) return false;
+
+  if (
+    src.startsWith("/") ||
+    src.startsWith("data:image/") ||
+    src.startsWith("blob:")
+  ) {
+    return true;
+  }
+
   try {
     new URL(src);
     return true;
   } catch {
-    return src.startsWith("/");
+    return false;
   }
 };
 
@@ -23,6 +32,7 @@ export default function FallbackImage({
   fallbackSrc = "/logo.jpeg",
   alt,
   onError,
+  unoptimized,
   ...props
 }: FallbackImageProps) {
   const validSrc = useMemo(
@@ -41,6 +51,9 @@ export default function FallbackImage({
   };
 
   const imageSrc = hasError ? fallbackSrc : validSrc;
+  const shouldBypassOptimization =
+    unoptimized ??
+    (imageSrc.startsWith("data:image/") || imageSrc.startsWith("blob:"));
 
   return (
     <Image
@@ -48,7 +61,7 @@ export default function FallbackImage({
       src={imageSrc}
       alt={alt || "image"}
       onError={handleError}
-      unoptimized={false}
+      unoptimized={shouldBypassOptimization}
     />
   );
 }

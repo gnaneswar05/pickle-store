@@ -2,6 +2,7 @@
 
 import { useAuth, useCart } from "@/app/store/useStore";
 import FallbackImage from "@/app/components/FallbackImage";
+import useSiteSettings from "@/app/components/useSiteSettings";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -12,9 +13,11 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const siteSettings = useSiteSettings();
   const itemCount = getItemCount();
   const navItems = [
     { href: "/", label: "Home" },
+    { href: "/about", label: "About Us" },
     { href: "/products", label: "Shop" },
     { href: "/orders", label: "Orders" },
   ];
@@ -45,8 +48,8 @@ export default function Header() {
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-[rgba(215,163,71,0.35)] blur-md transition group-hover:scale-110" />
               <FallbackImage
-                src="/logo.jpeg"
-                alt="Kanvi logo"
+                src={siteSettings.logoUrl}
+                alt={`${siteSettings.brandName} logo`}
                 width={44}
                 height={44}
                 className="relative rounded-full border border-white/70 shadow-md"
@@ -55,10 +58,10 @@ export default function Header() {
             </div>
             <div className="min-w-0">
               <p className="hidden text-[11px] font-semibold uppercase tracking-[0.35em] text-[var(--olive)] sm:block">
-                Small Batch Pickles
+                {siteSettings.brandTagline}
               </p>
               <p className="truncate text-lg font-semibold text-[var(--brand-deep)] sm:text-xl">
-                Kanvi
+                {siteSettings.brandName}
               </p>
             </div>
           </Link>
@@ -98,8 +101,14 @@ export default function Header() {
             {isAuthenticated() ? (
               <div className="flex items-center gap-2">
                 <div className="hidden rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm text-stone-700 lg:block">
-                  {user?.phone}
+                  {user?.name || user?.phone}
                 </div>
+                <Link
+                  href="/account"
+                  className="rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--brand-deep)] shadow-sm hover:-translate-y-0.5"
+                >
+                  Account
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="rounded-full bg-[var(--brand-deep)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:-translate-y-0.5"
@@ -117,30 +126,43 @@ export default function Header() {
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen((current) => !current)}
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--line)] bg-white text-[var(--brand-deep)] shadow-sm md:hidden"
-          >
-            <span className="relative h-4 w-5">
-              <span
-                className={`absolute left-0 top-0 h-0.5 w-5 rounded-full bg-current transition ${
-                  mobileMenuOpen ? "translate-y-[7px] rotate-45" : ""
-                }`}
-              />
-              <span
-                className={`absolute left-0 top-[7px] h-0.5 w-5 rounded-full bg-current transition ${
-                  mobileMenuOpen ? "opacity-0" : ""
-                }`}
-              />
-              <span
-                className={`absolute left-0 top-[14px] h-0.5 w-5 rounded-full bg-current transition ${
-                  mobileMenuOpen ? "-translate-y-[7px] -rotate-45" : ""
-                }`}
-              />
-            </span>
-          </button>
+          <div className="flex items-center gap-3 md:hidden">
+            <Link
+              href="/cart"
+              className="relative inline-flex items-center justify-center rounded-full border border-[var(--line)] bg-white px-3 py-2 text-sm font-semibold text-[var(--brand-deep)] shadow-sm"
+            >
+              Cart
+              {itemCount > 0 ? (
+                <span className="ml-1.5 inline-flex min-w-5 items-center justify-center rounded-full bg-[var(--brand)] px-1 py-0.5 text-[10px] text-white">
+                  {itemCount}
+                </span>
+              ) : null}
+            </Link>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((current) => !current)}
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--line)] bg-white text-[var(--brand-deep)] shadow-sm"
+            >
+              <span className="relative h-4 w-5">
+                <span
+                  className={`absolute left-0 top-0 h-0.5 w-5 rounded-full bg-current transition ${
+                    mobileMenuOpen ? "translate-y-[7px] rotate-45" : ""
+                  }`}
+                />
+                <span
+                  className={`absolute left-0 top-[7px] h-0.5 w-5 rounded-full bg-current transition ${
+                    mobileMenuOpen ? "opacity-0" : ""
+                  }`}
+                />
+                <span
+                  className={`absolute left-0 top-[14px] h-0.5 w-5 rounded-full bg-current transition ${
+                    mobileMenuOpen ? "-translate-y-[7px] -rotate-45" : ""
+                  }`}
+                />
+              </span>
+            </button>
+          </div>
         </div>
 
         <div
@@ -184,13 +206,23 @@ export default function Header() {
             </nav>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <Link
-                href="/cart"
-                onClick={() => setMobileMenuOpen(false)}
-                className="rounded-[22px] border border-[var(--line)] bg-white px-4 py-3 text-center text-sm font-semibold text-[var(--brand-deep)]"
-              >
-                Cart {itemCount > 0 ? `(${itemCount})` : ""}
-              </Link>
+              {isAuthenticated() ? (
+                <Link
+                  href="/account"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-[22px] border border-[var(--line)] bg-white px-4 py-3 text-center text-sm font-semibold text-[var(--brand-deep)]"
+                >
+                  Account
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="col-span-2 rounded-[22px] bg-[var(--accent)] px-4 py-3 text-center text-sm font-semibold text-stone-900"
+                >
+                  Sign in or Create Account
+                </Link>
+              )}
               {isAuthenticated() ? (
                 <button
                   onClick={handleLogout}
@@ -198,20 +230,12 @@ export default function Header() {
                 >
                   Sign out
                 </button>
-              ) : (
-                <Link
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-[22px] bg-[var(--accent)] px-4 py-3 text-center text-sm font-semibold text-stone-900"
-                >
-                  Sign in
-                </Link>
-              )}
+              ) : null}
             </div>
 
             {isAuthenticated() ? (
               <div className="mt-4 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-sm text-stone-700">
-                Logged in as {user?.phone}
+                Logged in as {user?.name || user?.phone}
               </div>
             ) : null}
           </div>

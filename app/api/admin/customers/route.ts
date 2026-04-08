@@ -52,6 +52,9 @@ export async function GET(request: NextRequest) {
         const stat = statsMap.get(String(customer._id));
         return {
           _id: String(customer._id),
+          name: customer.name || "",
+          email: customer.email || "",
+          gender: customer.gender || "",
           phone: customer.phone,
           isVerified: customer.isVerified,
           createdAt: customer.createdAt,

@@ -85,7 +85,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (!isAuthenticated()) {
-      router.push("/login");
+      router.push("/login?callbackUrl=/checkout");
     }
   }, [isAuthenticated, router]);
 

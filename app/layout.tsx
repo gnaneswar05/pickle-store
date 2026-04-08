@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import AppFrame from "@/app/components/AppFrame";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import ToastViewport from "@/app/components/ToastViewport";
@@ -34,9 +35,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)]">
         <ToastViewport />
         <Header />
-        <main className="flex-1 max-w-7xl w-full mx-auto px-5 lg:px-8 py-8 md:py-12">
-          {children}
-        </main>
+        <AppFrame>{children}</AppFrame>
         <Footer />
       </body>
     </html>

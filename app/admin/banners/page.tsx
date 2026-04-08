@@ -45,7 +45,7 @@ export default function AdminBannersPage() {
   }, [router]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure?")) return;
+    if (!confirm("Are you sure you want to delete this banner?")) return;
 
     try {
       const res = await fetch(`/api/banners/${id}`, {
@@ -66,76 +66,86 @@ export default function AdminBannersPage() {
   return (
     <AdminShell
       activeHref="/admin/banners"
-      title="Banners"
-      subtitle="Update homepage campaigns and hero visuals."
+      title="Homepage Banners"
+      subtitle="Keep the homepage carousel compact, image-led, and campaign-focused."
       actions={
         <Link
           href="/admin/banners/new"
-          className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          className="rounded-full bg-[#3b2317] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:-translate-y-0.5"
         >
           Add Banner
         </Link>
       }
     >
-        {loading ? (
-          <div className="rounded-xl border border-gray-200/50 bg-white p-10 text-center text-gray-600 shadow-sm">
-            Loading banners...
-          </div>
-        ) : banners.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {banners.map((banner) => (
-              <div
-                key={banner._id}
-                className="overflow-hidden rounded-xl border border-gray-200/50 bg-white shadow-sm"
-              >
-                <div className="h-40 bg-gray-100 relative w-full">
-                  <FallbackImage
-                    src={banner.image}
-                    alt={banner.title}
-                    fill
-                    className="object-cover"
-                  />
+      {loading ? (
+        <div className="rounded-[28px] border border-[#eadfce] bg-white p-10 text-center text-slate-600 shadow-[0_16px_45px_rgba(79,55,32,0.08)]">
+          Loading banners...
+        </div>
+      ) : banners.length > 0 ? (
+        <div className="grid gap-5 lg:grid-cols-2">
+          {banners.map((banner, index) => (
+            <div
+              key={banner._id}
+              className="overflow-hidden rounded-[28px] border border-[#eadfce] bg-white shadow-[0_16px_45px_rgba(79,55,32,0.08)]"
+            >
+              <div className="relative h-52 w-full bg-[#f5ede2]">
+                <FallbackImage
+                  src={banner.image}
+                  alt={banner.title}
+                  fill
+                  className="object-cover"
+                  fallbackSrc="/logo.jpeg"
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_18%,rgba(27,14,8,0.68)_100%)]" />
+                <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[#3b2317]">
+                  Slide {String(index + 1).padStart(2, "0")}
                 </div>
-                <div className="p-4">
-                  <h3 className="font-bold text-lg mb-2">{banner.title}</h3>
-                  <div className="flex justify-between items-center">
-                    <span
-                      className={
-                        banner.isActive ? "text-green-600" : "text-gray-500"
-                      }
-                    >
-                      {banner.isActive ? "✅ Active" : "❌ Inactive"}
-                    </span>
-                    <div className="space-x-2">
-                      <Link
-                        href={`/admin/banners/${banner._id}/edit`}
-                        className="text-blue-600 hover:underline"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(banner._id)}
-                        className="text-red-600 hover:underline"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
+                <div className="absolute bottom-4 left-4 right-4">
+                  <h3 className="text-xl font-semibold text-white">{banner.title}</h3>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No banners yet</p>
-            <Link
-              href="/admin/banners/new"
-              className="rounded-lg bg-slate-900 px-6 py-2 text-white hover:bg-slate-800"
-            >
-              Create First Banner
-            </Link>
-          </div>
-        )}
+
+              <div className="flex items-center justify-between gap-3 p-5">
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    banner.isActive
+                      ? "bg-[#e5f3e4] text-[#2f6b2d]"
+                      : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {banner.isActive ? "Active" : "Inactive"}
+                </span>
+
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href={`/admin/banners/${banner._id}/edit`}
+                    className="rounded-full bg-[#3b2317] px-4 py-2 text-sm font-semibold text-white"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(banner._id)}
+                    className="rounded-full border border-[#e6b6ac] bg-[#fff4f1] px-4 py-2 text-sm font-semibold text-[#b2412d]"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-[28px] border border-[#eadfce] bg-white p-10 text-center shadow-[0_16px_45px_rgba(79,55,32,0.08)]">
+          <p className="text-slate-600">No banners yet</p>
+          <Link
+            href="/admin/banners/new"
+            className="mt-4 inline-flex rounded-full bg-[#3b2317] px-5 py-2.5 text-sm font-semibold text-white"
+          >
+            Create First Banner
+          </Link>
+        </div>
+      )}
     </AdminShell>
   );
 }

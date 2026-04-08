@@ -1,12 +1,12 @@
 import { NextRequest } from "next/server";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
-import { generateOTP, generateToken } from "@/lib/utils/auth";
 import {
   errorResponse,
   successResponse,
   handleError,
 } from "@/lib/utils/response";
+import { isProfileComplete } from "@/lib/utils/user-profile";
 import { validatePhone } from "@/lib/utils/validation";
 
 export async function POST(request: NextRequest) {
@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
     return successResponse({
       message: "OTP sent successfully",
       phone,
+      requiresProfile: !isProfileComplete(user),
     });
   } catch (error) {
     return handleError(error);
