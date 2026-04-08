@@ -113,7 +113,7 @@ export default function AdminDashboardPage() {
         <section className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
             {(loading ? Array.from({ length: 4 }) : statCards).map(
-              (card, index) => (
+              (card: any, index: number) => (
                 <div
                   key={loading ? index : card.label}
                   className="rounded-[28px] border border-[#eadfce] bg-[linear-gradient(180deg,#fffdf9_0%,#fff6ec_100%)] p-5 shadow-[0_16px_45px_rgba(79,55,32,0.08)]"
